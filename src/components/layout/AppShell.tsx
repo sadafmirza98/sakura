@@ -1,37 +1,32 @@
 'use client'
 import { ReactNode } from 'react'
-import Navigation from './Navigation'
-import GardenBackground from '@/components/ui/GardenBackground'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import GardenBg from '@/components/world/GardenBg'
 
 export default function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen">
-      <GardenBackground petalCount={14} />
-      <Navigation />
+    <div className="min-h-screen" style={{ overflow: 'auto' }}>
+      <GardenBg />
+      {/* Back to garden */}
+      <motion.div className="fixed top-5 left-5 z-30" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <Link href="/home">
+          <motion.div className="flex items-center gap-2 glass-warm rounded-2xl px-4 py-2.5 cursor-pointer"
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+            <ArrowLeft size={14} style={{ color: '#f2a8b8' }} />
+            <span className="font-sans text-xs" style={{ color: 'rgba(242,168,184,0.8)' }}>Return to Garden</span>
+          </motion.div>
+        </Link>
+      </motion.div>
       <motion.main
-        className="relative z-20 min-h-screen"
-        style={{
-          // Desktop: sidebar offset. Mobile: top bar offset only
-        }}
+        className="relative z-10 min-h-screen"
+        style={{ padding: '80px 32px 60px' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.45 }}
+        transition={{ duration: 0.4 }}
       >
-        {/* Desktop layout */}
-        <div
-          className="hidden md:block min-h-screen"
-          style={{ marginLeft: 220, padding: '36px 44px' }}
-        >
-          {children}
-        </div>
-        {/* Mobile layout */}
-        <div
-          className="md:hidden min-h-screen"
-          style={{ paddingTop: 72, padding: '72px 18px 32px' }}
-        >
-          {children}
-        </div>
+        <div className="max-w-4xl mx-auto">{children}</div>
       </motion.main>
     </div>
   )
