@@ -62,7 +62,7 @@ function artworkOffset(): Pos {
 
 // [angle_deg_from_3oclock, radius_px]
 const ORGANIC: Array<[number, number]> = [
-  [ -118, 285 ],  // Poems     — upper-left, moderate distance
+  [  -92, 300 ],  // Poems     — top, moderate distance
   [  -42, 365 ],  // Wishes    — upper-right
   [   22, 345 ],  // Places    — right
   [  138, 295 ],  // Memories  — lower-left

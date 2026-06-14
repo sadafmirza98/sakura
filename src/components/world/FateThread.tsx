@@ -27,7 +27,7 @@ import { useContentStore, type ContentItem } from '@/store/useContentStore'
 /* ─────────────────────────────────────────────────────────────────────
    BOARD POSITION — matches the wooden board on the far right
 ───────────────────────────────────────────────────────────────────── */
-const BOARD_LEFT  = '95%'
+const BOARD_LEFT  = '90%'
 const BOARD_TOP   = '72%'
 const BOARD_W     = 180     // px
 const BOARD_H     = 340     // px
@@ -701,7 +701,7 @@ function BlankNoteEditor({ onSave, onCancel }: BlankNoteEditorProps) {
         }} />
 
         <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontStyle: 'italic', fontSize: 17, color: 'rgba(80,50,20,0.8)', marginBottom: 20, textAlign: 'center' }}>
-          a new memory…
+          A new memory…
         </p>
 
         <label htmlFor="bn-title" style={labelStyle}>Memory Title</label>
@@ -770,7 +770,7 @@ function BlankNoteEditor({ onSave, onCancel }: BlankNoteEditorProps) {
               fontStyle: 'italic', fontSize: 13, opacity: saving ? 0.6 : 1,
             }}
           >
-            fold this memory into our story
+            Fold this memory into our story
           </motion.button>
           <motion.button
             type="button"
@@ -783,7 +783,7 @@ function BlankNoteEditor({ onSave, onCancel }: BlankNoteEditorProps) {
               color: 'rgba(100,80,40,0.5)', fontSize: 12, fontFamily: 'Inter, sans-serif',
             }}
           >
-            cancel
+            Cancel
           </motion.button>
         </div>
       </motion.div>
@@ -864,9 +864,9 @@ export default function FateThreadOverlay() {
   const boardX = W * 0.95
   const boardY = H * 0.72
 
-  // Spool position — left edge of the thread, before first node
-  const spoolX = nodePositions.length > 0 ? Math.max(60, (nodePositions[0]?.x ?? 120) - 80) : W * 0.06
-  const spoolY = nodePositions.length > 0 ? (nodePositions[0]?.y ?? H * 0.5) : H * 0.5
+  // Spool position — centre-top, always reachable regardless of thread layout
+  const spoolX = W * 0.5
+  const spoolY = H * 0.2
 
   return (
     <>
