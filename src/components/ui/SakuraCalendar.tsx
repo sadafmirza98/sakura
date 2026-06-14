@@ -62,8 +62,28 @@ export default function SakuraCalendar({ value, onChange, placeholder = 'Choose 
   const [open, setOpen] = useState(false)
   const [viewYear, setViewYear] = useState(() => selectedParts?.y ?? today.getFullYear())
   const [viewMonth, setViewMonth] = useState(() => selectedParts?.m ?? today.getMonth())
+  // Whether the popover drops below the trigger or rises above it —
+  // decided when opened, based on available viewport space.
+  const [placement, setPlacement] = useState<'top' | 'bottom'>('bottom')
 
   const wrapperRef = useRef<HTMLDivElement>(null)
+
+  // Decide drop direction on open — the calendar is ~420px tall, so prefer
+  // the side with more room (falling back to "up" only if there's
+  // genuinely more space above, otherwise it'd be clipped by the viewport).
+  const toggleOpen = () => {
+    setOpen((wasOpen) => {
+      const willOpen = !wasOpen
+      if (willOpen && wrapperRef.current) {
+        const rect = wrapperRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceAbove = rect.top
+        const CALENDAR_HEIGHT = 430
+        setPlacement(spaceBelow >= CALENDAR_HEIGHT || spaceBelow >= spaceAbove ? 'bottom' : 'top')
+      }
+      return willOpen
+    })
+  }
 
   // Close on outside click
   useEffect(() => {
@@ -130,7 +150,7 @@ export default function SakuraCalendar({ value, onChange, placeholder = 'Choose 
       {/* Trigger input */}
       <button
         type="button"
-        onClick={() => setOpen(o => !o)}
+        onClick={toggleOpen}
         aria-haspopup="dialog"
         aria-expanded={open}
         style={{
@@ -175,13 +195,15 @@ export default function SakuraCalendar({ value, onChange, placeholder = 'Choose 
           <motion.div
             role="dialog"
             aria-label="Sakura calendar"
-            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            initial={{ opacity: 0, y: placement === 'bottom' ? 8 : -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            exit={{ opacity: 0, y: placement === 'bottom' ? 6 : -6, scale: 0.97 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             style={{
               position: 'absolute',
-              bottom: 'calc(100% + 8px)',
+              ...(placement === 'bottom'
+                ? { top: 'calc(100% + 8px)' }
+                : { bottom: 'calc(100% + 8px)' }),
               left: 0,
               right: 0,
               zIndex: 100,

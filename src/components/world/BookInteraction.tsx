@@ -20,6 +20,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { useUIStore, type RightPanelType, type CreateType } from '@/store/useUIStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
 
 /* ─────────────────────────────────────────────────────────────────────
    LAYOUT CONSTANTS
@@ -98,6 +99,47 @@ const RING_ITEMS: RingItem[] = [
   { type: 'song',   asset: '/assets/ui/petal.png',    label: 'Songs',    accent: '#ffb450', floatDur: 5.9, floatAmp: 13, floatDelay: 0.4 },
   { type: 'letter', asset: '/assets/ui/letter.png',   label: 'Letters',  accent: '#d4aaff', floatDur: 3.7, floatAmp:  8, floatDelay: 1.1 },
 ]
+
+/* ─────────────────────────────────────────────────────────────────────
+   CONTENT PREVIEW
+   Maps each ring item to its content-store collection and the field
+   that best represents "what was added", so hovering a ring object
+   shows the most recently saved item instead of just the type name.
+───────────────────────────────────────────────────────────────────── */
+
+const COLLECTION_KEY = {
+  poem: 'poems',
+  wish: 'wishes',
+  place: 'places',
+  memory: 'memories',
+  song: 'songs',
+  letter: 'letters',
+} as const
+
+const PREVIEW_FIELD = {
+  poem: 'title',
+  wish: 'wish',
+  place: 'place',
+  memory: 'title',
+  song: 'title',
+  letter: 'openWhen',
+} as const
+
+type PreviewableType = keyof typeof COLLECTION_KEY
+
+function latestItem(items: ContentItem[]): ContentItem | undefined {
+  if (items.length === 0) return undefined
+  return [...items].sort((a, b) => {
+    const aDate = typeof a.createdAt === 'string' ? a.createdAt : ''
+    const bDate = typeof b.createdAt === 'string' ? b.createdAt : ''
+    return bDate.localeCompare(aDate)
+  })[0]
+}
+
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text
+  return `${text.slice(0, max - 1).trimEnd()}…`
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    BURST PARTICLES
@@ -545,6 +587,7 @@ function ThreadCanvas({ positions, bookX, bookY }: ThreadProps) {
 
 export default function MemoryRing() {
   const { bloomOpen, closeBloom, openCreate, createSelectorOpen, closeCreateSelector } = useUIStore()
+  const content = useContentStore()
 
   const [objPositions, setObjPositions] = useState<Array<Pos | null>>(RING_ITEMS.map(() => null))
   const [bookScreenPos, setBookScreenPos] = useState<Pos>({ x: 0, y: 0 })
@@ -702,15 +745,25 @@ export default function MemoryRing() {
               style={{ position: 'absolute', width: 80, height: 80, top: -40, left: -40, borderRadius: '50%', border: '1px solid rgba(242,168,184,0.4)', pointerEvents: 'none' }}
             />
 
-            {RING_ITEMS.map((item, i) => (
-              <BloomObject
-                key={item.type as string}
-                item={item}
-                index={i}
-                onOpen={() => handleItemClick(item)}
-                onPositionChange={(pos) => updatePos(i, pos)}
-              />
-            ))}
+            {RING_ITEMS.map((item, i) => {
+              const key = item.type as PreviewableType
+              const items = content[COLLECTION_KEY[key]]
+              const latest = latestItem(items)
+              const previewVal = latest?.[PREVIEW_FIELD[key]]
+              const preview = typeof previewVal === 'string' && previewVal.trim() ? previewVal.trim() : null
+
+              return (
+                <BloomObject
+                  key={item.type as string}
+                  item={item}
+                  index={i}
+                  count={items.length}
+                  preview={preview}
+                  onOpen={() => handleItemClick(item)}
+                  onPositionChange={(pos) => updatePos(i, pos)}
+                />
+              )
+            })}
           </div>
         )}
       </AnimatePresence>
@@ -726,11 +779,13 @@ export default function MemoryRing() {
 interface BloomObjectProps {
   readonly item: RingItem
   readonly index: number
+  readonly count: number
+  readonly preview: string | null
   readonly onOpen: () => void
   readonly onPositionChange: (pos: Pos | null) => void
 }
 
-function BloomObject({ item, index, onOpen, onPositionChange }: BloomObjectProps) {
+function BloomObject({ item, index, count, preview, onOpen, onPositionChange }: BloomObjectProps) {
   const [hovering, setHovering] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const pos = organicPos(index)
@@ -810,6 +865,7 @@ function BloomObject({ item, index, onOpen, onPositionChange }: BloomObjectProps
                 : `drop-shadow(0 2px 14px rgba(0,0,0,0.7)) drop-shadow(0 0 5px ${item.accent}44) brightness(0.9)`,
             }}
             transition={{ duration: 0.24 }}
+            style={{ position: 'relative' }}
           >
             <Image
               src={item.asset}
@@ -819,6 +875,38 @@ function BloomObject({ item, index, onOpen, onPositionChange }: BloomObjectProps
               height={72}
               style={{ width: 72, height: 72, objectFit: 'contain', display: 'block' }}
             />
+
+            {/* Saved-count badge — confirms what's actually been added */}
+            {count > 0 && (
+              <motion.div
+                aria-hidden="true"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -2,
+                  minWidth: 18,
+                  height: 18,
+                  padding: '0 5px',
+                  borderRadius: 9,
+                  background: item.accent,
+                  color: 'rgba(20,14,40,0.92)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 2px 10px ${item.accent}99, 0 0 0 2px rgba(10,7,24,0.85)`,
+                  zIndex: 2,
+                }}
+              >
+                {count}
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Label */}
@@ -839,6 +927,32 @@ function BloomObject({ item, index, onOpen, onPositionChange }: BloomObjectProps
           >
             {item.label}
           </motion.span>
+
+          {/* Preview of the most recently added item — only while hovering */}
+          <AnimatePresence>
+            {hovering && preview && (
+              <motion.span
+                key="preview"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 0.9, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 300,
+                  fontSize: 10.5,
+                  letterSpacing: '0.02em',
+                  color: item.accent,
+                  textShadow: '0 1px 10px rgba(0,0,0,0.95)',
+                  whiteSpace: 'nowrap',
+                  display: 'block',
+                  marginTop: -4,
+                }}
+              >
+                “{truncate(preview, 28)}”
+              </motion.span>
+            )}
+          </AnimatePresence>
         </motion.button>
       </motion.div>
     </motion.div>

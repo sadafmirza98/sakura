@@ -294,6 +294,7 @@ function MemoryNote({ mem, x, y, index, milestone, onSelect }: NoteProps) {
       />
 
       {/* Note paper — sway animation */}
+      <g transform={`translate(${x}, ${noteY})`}>
       <motion.g
         style={{ cursor: 'pointer' }}
         animate={{
@@ -309,7 +310,6 @@ function MemoryNote({ mem, x, y, index, milestone, onSelect }: NoteProps) {
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         onClick={() => onSelect(mem.id)}
-        transform={`translate(${x}, ${noteY})`}
       >
         {/* Note background */}
         <motion.rect
@@ -412,6 +412,7 @@ function MemoryNote({ mem, x, y, index, milestone, onSelect }: NoteProps) {
           </>
         )}
       </motion.g>
+      </g>
     </motion.g>
   )
 }
@@ -816,11 +817,18 @@ export default function FateThreadOverlay() {
   }, [])
 
   // Sample node positions along path after thread phase
+  // Sample N+2 points (including both path endpoints), then drop the
+  // endpoints so memory notes sit inside the visible thread — never
+  // anchored to x=0 / x=W where their paper would spill off-screen.
   useEffect(() => {
     if (phase !== 'thread' || !pathRef.current) return
     const el = pathRef.current
-    const count = Math.min(memories.length, 12) + 1
+    const count = Math.min(memories.length, 12) + 2
+    const margin = 55 // half-width of a milestone note + its glow halo
+    const maxX = window.innerWidth - margin
     const positions = samplePath(el, count)
+      .slice(1, -1)
+      .map((p) => ({ ...p, x: Math.min(Math.max(p.x, margin), maxX) }))
     setNodePositions(positions)
   }, [phase, memories.length])
 
