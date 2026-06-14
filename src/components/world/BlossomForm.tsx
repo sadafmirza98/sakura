@@ -6,10 +6,10 @@ import { useAppStore } from '@/store/useAppStore'
 
 const FORM_META: Record<CreateType, { emoji: string; title: string; color: string; blossoms: number }> = {
   memory:    { emoji: '🌸', title: 'Plant a Memory',     color: '#f2a8b8', blossoms: 1 },
-  song:      { emoji: '🏮', title: 'Hang a Lantern',     color: '#ffb450', blossoms: 1 },
+  wish:      { emoji: '🏮', title: 'Hang a Lantern',     color: '#ffb450', blossoms: 1 },
   poem:      { emoji: '🪷', title: 'Release a Petal',    color: '#c9bfe8', blossoms: 2 },
   whisper:   { emoji: '🍃', title: 'Whisper a Leaf',     color: '#a8d8a0', blossoms: 0 },
-  wish:      { emoji: '⭐', title: 'Plant a Wish',       color: '#e8c97a', blossoms: 0 },
+  song:      { emoji: '⭐', title: 'Sing a Muse',       color: '#e8c97a', blossoms: 0 },
   place:     { emoji: '🗺️', title: 'Mark a Footprint',  color: '#a8d0e8', blossoms: 0 },
   letter:    { emoji: '🕊️', title: 'Seal a Letter',      color: '#d4aaff', blossoms: 3 },
   milestone: { emoji: '🕯️', title: 'Light a Milestone',  color: '#ffd090', blossoms: 5 },

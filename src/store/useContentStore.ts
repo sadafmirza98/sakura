@@ -37,6 +37,7 @@ interface ContentState {
   initListeners: () => () => void
   add: (type: CollectionName, data: Record<string, unknown>) => Promise<string>
   delete: (type: CollectionName, id: string) => Promise<void>
+  createTimelineEvent: (sourceType: string, sourceId: string, title: string, date?: string) => Promise<string>
 }
 
 const COLLECTIONS = [
@@ -54,7 +55,7 @@ const COLLECTIONS = [
 type CollectionName = typeof COLLECTIONS[number]
 type CountKey = `${CollectionName}Count`
 
-export const useContentStore = create<ContentState>()((set) => ({
+export const useContentStore = create<ContentState>()((set, get) => ({
   // Initial empty arrays
   memories: [],
   songs: [],
@@ -84,7 +85,12 @@ export const useContentStore = create<ContentState>()((set) => ({
   add: async (type, data) => {
     const countKey: CountKey = `${type}Count`
     const now = new Date().toISOString()
-    const payload = { ...data, createdAt: now }
+    const payload: Record<string, unknown> = { ...data, createdAt: now }
+
+    // Firestore's addDoc() rejects `undefined` field values — drop them
+    for (const key of Object.keys(payload)) {
+      if (payload[key] === undefined) delete payload[key]
+    }
 
     try {
       const docRef = await addDoc(collection(db, type), payload)
@@ -159,5 +165,15 @@ export const useContentStore = create<ContentState>()((set) => ({
     return () => {
       unsubscribers.forEach((unsub) => unsub())
     }
+  },
+
+  createTimelineEvent: async (sourceType, sourceId, title, date) => {
+    return get().add('memories', {
+      title,
+      date: date ?? new Date().toISOString().split('T')[0],
+      type: 'timeline-event',
+      sourceType,
+      sourceId,
+    })
   },
 }))

@@ -64,6 +64,8 @@ interface UIState {
   createSelectorOpen: boolean
   /** Whether the fate thread timeline is open (triggered by clicking the board). */
   timelineOpen: boolean
+  /** Whether the board is being hovered — drives BoardAmbient chalk-text + lantern effects. */
+  boardHovered: boolean
 
   openRightPanel: (type: RightPanelType, context?: Record<string, unknown>) => void
   closeRightPanel: () => void
@@ -82,6 +84,7 @@ interface UIState {
   closeCreateSelector: () => void
   openTimeline: () => void
   closeTimeline: () => void
+  setBoardHovered: (v: boolean) => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -98,6 +101,7 @@ export const useUIStore = create<UIState>()(
       bloomOpen: false,
       createSelectorOpen: false,
       timelineOpen: false,
+      boardHovered: false,
 
       openRightPanel: (type, context = {}) =>
         set({
@@ -128,6 +132,7 @@ export const useUIStore = create<UIState>()(
       closeCreateSelector: () => set({ createSelectorOpen: false }),
       openTimeline: () => set({ timelineOpen: true, bloomOpen: false }),
       closeTimeline: () => set({ timelineOpen: false }),
+      setBoardHovered: (v) => set({ boardHovered: v }),
     }),
     {
       name: 'sakura-ui-v1',

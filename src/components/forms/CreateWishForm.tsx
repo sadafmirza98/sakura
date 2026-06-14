@@ -44,12 +44,13 @@ export default function CreateWishForm({ onSave }: Readonly<Props>) {
     }
   }
 
-  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} />
+  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} icon="/assets/ui/lantern.png" />
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <span style={{ fontSize: 28, filter: `drop-shadow(0 0 10px ${ACCENT}88)` }}>⭐</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/ui/lantern.png" alt="" aria-hidden="true" style={{ width: 32, height: 32, objectFit: 'contain', filter: `drop-shadow(0 0 10px ${ACCENT}88)` }} />
         <div>
           <p className="font-serif" style={{ fontSize: 16, color: '#f0eefc', fontWeight: 300 }}>Plant a Wish</p>
         </div>
@@ -75,13 +76,7 @@ export default function CreateWishForm({ onSave }: Readonly<Props>) {
         </SakuraSelect>
       </Field>
 
-      <SaveButton
-        accent={ACCENT}
-        emoji="⭐"
-        label="Plant this wish"
-        onClick={handleSave}
-        disabled={saving}
-      />
+      <SaveButton accent={ACCENT} icon="/assets/ui/lantern.png" label="Plant this wish" onClick={handleSave} disabled={saving} />
     </div>
   )
 }

@@ -44,12 +44,13 @@ export default function CreateMilestoneForm({ onSave }: Readonly<Props>) {
     }
   }
 
-  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} />
+  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} icon="/assets/ui/memories.png" />
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <span style={{ fontSize: 28, filter: `drop-shadow(0 0 10px ${ACCENT}88)` }}>🕯️</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/ui/memories.png" alt="" aria-hidden="true" style={{ width: 32, height: 32, objectFit: 'contain', filter: `drop-shadow(0 0 10px ${ACCENT}88)` }} />
         <div>
           <p className="font-serif" style={{ fontSize: 16, color: '#f0eefc', fontWeight: 300 }}>Light a Milestone</p>
           <p className="font-sans" style={{ fontSize: 11, color: `${ACCENT}99`, marginTop: 2 }}>+{BLOSSOMS} blossoms will bloom</p>
@@ -80,13 +81,7 @@ export default function CreateMilestoneForm({ onSave }: Readonly<Props>) {
         />
       </Field>
 
-      <SaveButton
-        accent={ACCENT}
-        emoji="🕯️"
-        label="Light this milestone"
-        onClick={handleSave}
-        disabled={saving}
-      />
+      <SaveButton accent={ACCENT} icon="/assets/ui/memories.png" label="Light this milestone" onClick={handleSave} disabled={saving} />
     </div>
   )
 }

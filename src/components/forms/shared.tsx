@@ -152,13 +152,13 @@ export function Field({ label, children }: Readonly<{ label?: string; children: 
 /* ─── SaveButton ───────────────────────────────────────────────────────── */
 export interface SaveButtonProps {
   accent: string
-  emoji: string
+  icon: string
   label: string
   onClick: () => void
   disabled?: boolean
 }
 
-export function SaveButton({ accent, emoji, label, onClick, disabled }: SaveButtonProps) {
+export function SaveButton({ accent, icon, label, onClick, disabled }: SaveButtonProps) {
   return (
     <motion.button
       type="button"
@@ -180,6 +180,10 @@ export function SaveButton({ accent, emoji, label, onClick, disabled }: SaveButt
         position: 'relative',
         overflow: 'hidden',
         opacity: disabled ? 0.5 : 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
       }}
       whileHover={disabled ? {} : {
         boxShadow: `0 0 24px ${accent}28`,
@@ -198,13 +202,15 @@ export function SaveButton({ accent, emoji, label, onClick, disabled }: SaveButt
           pointerEvents: 'none',
         }}
       />
-      {emoji} {label}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={icon} alt="" aria-hidden="true" style={{ width: 16, height: 16, objectFit: 'contain', filter: `drop-shadow(0 0 5px ${accent}88)`, flexShrink: 0 }} />
+      {label}
     </motion.button>
   )
 }
 
 /* ─── Success state ────────────────────────────────────────────────────── */
-export function SuccessState({ accent, blossoms }: Readonly<{ accent: string; blossoms: number }>) {
+export function SuccessState({ accent, blossoms, icon = '/assets/ui/memories.png' }: Readonly<{ accent: string; blossoms: number; icon?: string }>) {
   return (
     <div
       style={{
@@ -217,11 +223,11 @@ export function SuccessState({ accent, blossoms }: Readonly<{ accent: string; bl
       }}
     >
       <motion.div
-        style={{ fontSize: 48 }}
         animate={{ scale: [1, 1.3, 1], rotate: [0, 15, -15, 0] }}
         transition={{ duration: 0.8 }}
       >
-        ✨
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={icon} alt="" aria-hidden="true" style={{ width: 56, height: 56, objectFit: 'contain', filter: `drop-shadow(0 0 16px ${accent}88)` }} />
       </motion.div>
       <p
         className="font-serif"

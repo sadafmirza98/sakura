@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node test6.js)",
+      "Bash(node test7.js)",
+      "Bash(node test9.js)"
+    ]
+  }
+}

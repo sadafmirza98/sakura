@@ -541,7 +541,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: bx - hitR, y: by - hitR, w: hitR * 2, h: hitR * 2,
           type: 'memory', id: mem.id,
-          label: `🌸 ${(mem.title as string) ?? 'Memory'}`,
+          label: (mem.title as string) ?? 'Memory',
           sublabel: (mem.date as string) ? `${mem.date as string} · Click to revisit` : 'Click to revisit',
         })
       })
@@ -577,7 +577,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: lx - hw, y: ly - hh, w: hw * 2, h: hh * 2,
           type: 'song', id: song.id,
-          label: `🏮 ${(song.title as string) ?? 'Song'}`,
+          label: (song.title as string) ?? 'Song',
           sublabel: (song.artist as string) ? `${song.artist as string} · Click to listen` : 'Click to listen',
         })
       })
@@ -614,7 +614,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: px - ps * 2, y: py - ps * 2, w: ps * 4, h: ps * 4,
           type: 'poem', id: poem.id,
-          label: `🪷 ${(poem.title as string) ?? 'Poem'}`,
+          label: (poem.title as string) ?? 'Poem',
           sublabel: 'Click to read',
         })
       })
@@ -644,7 +644,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: x - ls * 2, y: y - ls * 2, w: ls * 4, h: ls * 4,
           type: 'whisper', id: whisper.id,
-          label: `🍃 ${(whisper.title as string) ?? 'Whisper'}`,
+          label: (whisper.title as string) ?? 'Whisper',
           sublabel: 'Click to read',
         })
       })
@@ -668,7 +668,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: x - cs * 2, y: y - cs * 2, w: cs * 4, h: cs * 4,
           type: 'letter', id: letter.id,
-          label: locked ? `🕊️ Sealed Letter` : `🕊️ ${(letter.title as string) ?? 'Letter'}`,
+          label: locked ? 'Sealed Letter' : (letter.title as string) ?? 'Letter',
           sublabel: locked ? `Opens ${(letter.unlockDate as string) ?? 'later'}` : 'Click to open',
         })
       })
@@ -701,7 +701,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: x - budSize * 2, y: y - budSize * 3, w: budSize * 4, h: budSize * 5,
           type: 'wish', id: wish.id,
-          label: `⭐ ${(wish.text as string) ?? (wish.title as string) ?? 'Wish'}`,
+          label: (wish.text as string) ?? (wish.title as string) ?? 'Wish',
           sublabel: completed ? 'Completed · Click to revisit' : 'Click to view',
         })
       })
@@ -740,7 +740,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: x - sw, y: y - sh, w: sw * 2, h: sh * 2,
           type: 'place', id: place.id,
-          label: `📍 ${(place.name as string) ?? (place.place as string) ?? 'Place'}`,
+          label: (place.name as string) ?? (place.place as string) ?? 'Place',
           sublabel: (place.country as string) ? `${place.country as string} · Click to visit` : 'Click to visit',
         })
       })
@@ -761,7 +761,7 @@ export default function WorldCanvas() {
         hitRegions.push({
           x: x - starR * 3, y: y - starR * 3, w: starR * 6, h: starR * 6,
           type: 'evening', id: evening.id,
-          label: `✨ ${(evening.title as string) ?? 'Evening'}`,
+          label: (evening.title as string) ?? 'Evening',
           sublabel: watched ? 'Watched · Click to revisit' : 'Planned · Click to view',
         })
       })
@@ -833,7 +833,7 @@ export default function WorldCanvas() {
           hitRegions.push({
             x: x - nodeR * 3, y: y - nodeR * 3, w: nodeR * 6, h: nodeR * 6,
             type: 'dream', id: dream.id,
-            label: `🌙 ${(dream.title as string) ?? 'Dream'}`,
+            label: (dream.title as string) ?? 'Dream',
             sublabel: achieved ? 'Achieved · Click to revisit' : 'Click to explore',
           })
         })

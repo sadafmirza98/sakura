@@ -35,12 +35,13 @@ export default function CreateWhisperForm({ onSave }: Readonly<Props>) {
     }
   }
 
-  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} />
+  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} icon="/assets/ui/petal.png" />
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <span style={{ fontSize: 28, filter: `drop-shadow(0 0 10px ${ACCENT}88)` }}>🍃</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/ui/petal.png" alt="" aria-hidden="true" style={{ width: 32, height: 32, objectFit: 'contain', filter: `drop-shadow(0 0 10px ${ACCENT}88)` }} />
         <div>
           <p className="font-serif" style={{ fontSize: 16, color: '#f0eefc', fontWeight: 300 }}>Whisper a Leaf</p>
         </div>
@@ -58,7 +59,7 @@ export default function CreateWhisperForm({ onSave }: Readonly<Props>) {
 
       <SaveButton
         accent={ACCENT}
-        emoji="🍃"
+        icon="/assets/ui/petal.png"
         label="Release this whisper"
         onClick={handleSave}
         disabled={saving}

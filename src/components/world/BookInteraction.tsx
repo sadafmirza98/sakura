@@ -91,12 +91,12 @@ interface RingItem {
 }
 
 const RING_ITEMS: RingItem[] = [
-  { type: 'poem',   asset: '/assets/ui/sakura.png',       label: 'Poems',    accent: '#c9bfe8', floatDur: 5.2, floatAmp:  9, floatDelay: 0   },
-  { type: 'wish',   asset: '/assets/ui/wish-blossom.png', label: 'Wishes',   accent: '#a8d8a0', floatDur: 4.1, floatAmp:  6, floatDelay: 0.8 },
-  { type: 'place',  asset: '/assets/ui/lantern.png',      label: 'Places',   accent: '#ffe890', floatDur: 6.8, floatAmp: 11, floatDelay: 1.6 },
-  { type: 'memory', asset: '/assets/ui/sakura.png',       label: 'Memories', accent: '#f2a8b8', floatDur: 4.8, floatAmp:  7, floatDelay: 2.3 },
-  { type: 'song',   asset: '/assets/ui/petal.png',        label: 'Songs',    accent: '#ffb450', floatDur: 5.9, floatAmp: 13, floatDelay: 0.4 },
-  { type: 'letter', asset: '/assets/ui/candle.png',       label: 'Letters',  accent: '#d4aaff', floatDur: 3.7, floatAmp:  8, floatDelay: 1.1 },
+  { type: 'poem',   asset: '/assets/ui/letter.png',   label: 'Poems',    accent: '#c9bfe8', floatDur: 5.2, floatAmp:  9, floatDelay: 0   },
+  { type: 'wish',   asset: '/assets/ui/lantern.png',  label: 'Wishes',   accent: '#a8d8a0', floatDur: 4.1, floatAmp:  6, floatDelay: 0.8 },
+  { type: 'place',  asset: '/assets/ui/map.png',      label: 'Places',   accent: '#ffe890', floatDur: 6.8, floatAmp: 11, floatDelay: 1.6 },
+  { type: 'memory', asset: '/assets/ui/memories.png', label: 'Memories', accent: '#f2a8b8', floatDur: 4.8, floatAmp:  7, floatDelay: 2.3 },
+  { type: 'song',   asset: '/assets/ui/petal.png',    label: 'Songs',    accent: '#ffb450', floatDur: 5.9, floatAmp: 13, floatDelay: 0.4 },
+  { type: 'letter', asset: '/assets/ui/letter.png',   label: 'Letters',  accent: '#d4aaff', floatDur: 3.7, floatAmp:  8, floatDelay: 1.1 },
 ]
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -389,7 +389,8 @@ export function BookJourney() {
         {phase !== 'idle' && (
           <motion.div
             key="book-inner"
-            style={{ position: 'absolute', transform: 'translate(-50%, -50%)' }}
+            style={{ position: 'absolute', width: 'clamp(160px, 16vw, 240px)' }}
+            transformTemplate={(_, generated) => `translate(-50%, -50%) ${generated}`}
             initial={{ x: startOffset.x, y: startOffset.y, scale: 0.45, opacity: 0 }}
             animate={animTarget}
             exit={{ x: startOffset.x, y: startOffset.y, scale: 0.45, opacity: 0, transition: { duration: 0.6 } }}
@@ -413,7 +414,7 @@ export function BookJourney() {
                 alt="Our story"
                 width={220}
                 height={160}
-                style={{ width: 'clamp(160px, 16vw, 240px)', height: 'auto', objectFit: 'contain', display: 'block' }}
+                style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
                 priority
               />
             </motion.div>
@@ -650,12 +651,12 @@ export default function MemoryRing() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0, transition: { duration: 0.3 } }}
               transition={{ delay: 0.5, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+              transformTemplate={(_, generated) => `translate(-50%, -50%) ${generated}`}
               style={{
                 position: 'absolute',
                 left: 0,
                 top:  0,
-                // Centre the image on the ring origin
-                transform: 'translate(-50%, -50%)',
+                width: 'clamp(130px, 13vw, 185px)',
                 zIndex: 26,          // above all ring items AND BookJourney (24)
                 pointerEvents: 'none',
               }}
@@ -677,7 +678,7 @@ export default function MemoryRing() {
                   width={180}
                   height={130}
                   style={{
-                    width: 'clamp(130px, 13vw, 185px)',
+                    width: '100%',
                     height: 'auto',
                     objectFit: 'contain',
                     display: 'block',
@@ -750,7 +751,8 @@ function BloomObject({ item, index, onOpen, onPositionChange }: BloomObjectProps
   return (
     <motion.div
       ref={ref}
-      style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}
+      style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'auto' }}
+      transformTemplate={(_, generated) => `translate(-50%, -50%) ${generated}`}
       initial={{ x: 0, y: 0, scale: 0, opacity: 0 }}
       animate={{ x: pos.x, y: pos.y, scale: 1, opacity: 1 }}
       exit={{

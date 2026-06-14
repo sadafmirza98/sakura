@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function CreateLetterForm({ onSave }: Readonly<Props>) {
-  const { add } = useContentStore()
+  const { add, createTimelineEvent } = useContentStore()
   const { addBlossoms } = useAppStore()
 
   const [openWhen, setOpenWhen]     = useState('')
@@ -25,12 +25,13 @@ export default function CreateLetterForm({ onSave }: Readonly<Props>) {
     if (saving) return
     setSaving(true)
     try {
-      await add('letters', {
+      const id = await add('letters', {
         openWhen: openWhen.trim() || 'When you need me most',
         unlockDate,
         letter,
         locked: unlockDate ? new Date(unlockDate) > new Date() : false,
       })
+      await createTimelineEvent('letter', id, openWhen.trim() || 'A sealed letter')
       addBlossoms(BLOSSOMS)
       setSuccess(true)
       setTimeout(() => {
@@ -42,12 +43,13 @@ export default function CreateLetterForm({ onSave }: Readonly<Props>) {
     }
   }
 
-  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} />
+  if (success) return <SuccessState accent={ACCENT} blossoms={BLOSSOMS} icon="/assets/ui/letter.png" />
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <span style={{ fontSize: 28, filter: `drop-shadow(0 0 10px ${ACCENT}88)` }}>🕊️</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/ui/letter.png" alt="" aria-hidden="true" style={{ width: 32, height: 32, objectFit: 'contain', filter: `drop-shadow(0 0 10px ${ACCENT}88)` }} />
         <div>
           <p className="font-serif" style={{ fontSize: 16, color: '#f0eefc', fontWeight: 300 }}>Seal a Letter</p>
           <p className="font-sans" style={{ fontSize: 11, color: `${ACCENT}99`, marginTop: 2 }}>+{BLOSSOMS} blossoms will bloom</p>
@@ -84,13 +86,7 @@ export default function CreateLetterForm({ onSave }: Readonly<Props>) {
         />
       </Field>
 
-      <SaveButton
-        accent={ACCENT}
-        emoji="🕊️"
-        label="Seal this letter"
-        onClick={handleSave}
-        disabled={saving}
-      />
+      <SaveButton accent={ACCENT} icon="/assets/ui/letter.png" label="Seal this letter" onClick={handleSave} disabled={saving} />
     </div>
   )
 }

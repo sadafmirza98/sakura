@@ -36,7 +36,8 @@ export default function PlacePanel({ item }: Readonly<Props>) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photoUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <span style={{ fontSize: 36, opacity: 0.25 }}>📍</span>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/assets/ui/map.png" alt="" aria-hidden="true" style={{ width: 36, height: 36, objectFit: 'contain', opacity: 0.25 }} />
         )}
       </div>
 
@@ -87,7 +88,8 @@ export default function PlacePanel({ item }: Readonly<Props>) {
 
       {/* Map embed placeholder */}
       <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 14, background: 'rgba(168,208,232,0.05)', border: '1px solid rgba(168,208,232,0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        <span style={{ fontSize: 24, opacity: 0.5 }}>📍</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/ui/map.png" alt="" aria-hidden="true" style={{ width: 24, height: 24, objectFit: 'contain', opacity: 0.5 }} />
         <p className="font-sans" style={{ fontSize: 12, color: 'rgba(168,208,232,0.4)', letterSpacing: '0.06em' }}>
           Map
         </p>

@@ -209,7 +209,7 @@ export default function MemoryPanel({ item }: Props) {
               className="font-sans"
               style={{ fontSize: 12, color: 'rgba(201,191,232,0.55)' }}
             >
-              📍 {location}
+              {location}
             </span>
           )}
         </motion.div>
@@ -365,8 +365,7 @@ function EmptyState() {
         textAlign: 'center',
       }}
     >
-      <motion.span
-        style={{ fontSize: 48, display: 'block' }}
+      <motion.div
         animate={{
           filter: [
             'drop-shadow(0 0 8px rgba(242,168,184,0.3))',
@@ -376,8 +375,9 @@ function EmptyState() {
         }}
         transition={{ duration: 3, repeat: Infinity }}
       >
-        🌸
-      </motion.span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/ui/memories.png" alt="" aria-hidden="true" style={{ width: 56, height: 56, objectFit: 'contain' }} />
+      </motion.div>
       <p className="font-serif" style={{ fontSize: 16, color: 'rgba(240,238,252,0.5)', fontStyle: 'italic' }}>
         This memory is still blooming...
       </p>

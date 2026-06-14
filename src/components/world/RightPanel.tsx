@@ -37,38 +37,38 @@ interface PanelConfig {
 
 // Asset mapping — only use PNGs that physically exist in /public/assets/ui/
 const ICONS = {
-  sakura:      '/assets/ui/sakura.png',       // memories / poems
-  wish:        '/assets/ui/wish-blossom.png', // wishes
-  lantern:     '/assets/ui/lantern.png',      // places
-  petal:       '/assets/ui/petal.png',        // songs
-  candle:      '/assets/ui/candle.png',       // letters
-  map:         '/assets/ui/map.png',          // places / dream
-  magicBook:   '/assets/ui/magic-book.png',   // comfort / fallback
+  memories:  '/assets/ui/memories.png',
+  petal:     '/assets/ui/petal.png',
+  letter:    '/assets/ui/letter.png',
+  lantern:   '/assets/ui/lantern.png',
+  map:       '/assets/ui/map.png',
+  candle:    '/assets/ui/candle.png',
+  magicBook: '/assets/ui/magic-book.png',
 } as const
 
 const PANEL_CFG: Record<string, PanelConfig> = {
-  create:  { icon: ICONS.magicBook, title: 'Add to our story',  subtitle: 'A new petal for the tree',       accent: '#f2a8b8' },
-  memory:  { icon: ICONS.sakura,    title: 'Memory',             subtitle: 'A moment held in blossom',       accent: '#f2a8b8' },
-  song:    { icon: ICONS.petal,     title: 'Song',               subtitle: 'A melody woven into time',       accent: '#ffb450' },
-  poem:    { icon: ICONS.sakura,    title: 'Poem',               subtitle: 'Words adrift in the air',        accent: '#c9bfe8' },
-  whisper: { icon: ICONS.petal,     title: 'Whisper',            subtitle: 'A quiet leaf in the wind',       accent: '#a8d8a0' },
-  letter:  { icon: ICONS.candle,    title: 'Sealed Letter',      subtitle: 'A crane carrying words',         accent: '#d4aaff' },
-  wish:    { icon: ICONS.wish,      title: 'Spring Wish',        subtitle: 'A bud reaching for light',       accent: '#a8d8a0' },
-  place:   { icon: ICONS.lantern,   title: 'Place',              subtitle: 'A lantern in the garden',        accent: '#ffe890' },
-  evening: { icon: ICONS.candle,    title: 'Evening',            subtitle: 'A star in the sky above',        accent: '#ffe890' },
-  dream:   { icon: ICONS.map,       title: 'Shared Dream',       subtitle: 'A constellation of hope',        accent: '#ffe890' },
-  comfort: { icon: ICONS.magicBook, title: 'Comfort Space',      subtitle: 'A sanctuary for the heart',      accent: '#f2a8b8' },
+  create:  { icon: ICONS.magicBook, title: 'Add to our story',  subtitle: 'A new petal for the tree',     accent: '#f2a8b8' },
+  memory:  { icon: ICONS.memories,  title: 'Memory',            subtitle: 'A moment held in blossom',     accent: '#f2a8b8' },
+  song:    { icon: ICONS.petal,     title: 'Song',              subtitle: 'A melody woven into time',     accent: '#ffb450' },
+  poem:    { icon: ICONS.letter,    title: 'Poem',              subtitle: 'Words adrift in the air',      accent: '#c9bfe8' },
+  whisper: { icon: ICONS.petal,     title: 'Whisper',           subtitle: 'A quiet leaf in the wind',     accent: '#a8d8a0' },
+  letter:  { icon: ICONS.letter,    title: 'Sealed Letter',     subtitle: 'A crane carrying words',       accent: '#d4aaff' },
+  wish:    { icon: ICONS.lantern,   title: 'Spring Wish',       subtitle: 'A lantern into the future',    accent: '#a8d8a0' },
+  place:   { icon: ICONS.map,       title: 'Place',             subtitle: 'A footprint on the map',       accent: '#ffe890' },
+  evening: { icon: ICONS.candle,    title: 'Evening',           subtitle: 'A star in the sky above',      accent: '#ffe890' },
+  dream:   { icon: ICONS.map,       title: 'Shared Dream',      subtitle: 'A constellation of hope',      accent: '#ffe890' },
+  comfort: { icon: ICONS.magicBook, title: 'Comfort Space',     subtitle: 'A sanctuary for the heart',    accent: '#f2a8b8' },
 }
 
 const CREATE_CFG: Record<string, PanelConfig> = {
-  memory:    { icon: ICONS.sakura,    title: 'New Memory',     subtitle: 'Preserve this moment forever',    accent: '#f2a8b8' },
-  song:      { icon: ICONS.petal,     title: 'New Song',       subtitle: 'Add a melody to our story',       accent: '#ffb450' },
-  poem:      { icon: ICONS.sakura,    title: 'New Poem',       subtitle: 'Write something beautiful',       accent: '#c9bfe8' },
-  whisper:   { icon: ICONS.petal,     title: 'New Whisper',    subtitle: 'A quiet thought for the wind',    accent: '#a8d8a0' },
-  letter:    { icon: ICONS.candle,    title: 'New Letter',     subtitle: 'Words sealed with love',          accent: '#d4aaff' },
-  wish:      { icon: ICONS.wish,      title: 'New Wish',       subtitle: 'Plant a seed of hope',            accent: '#a8d8a0' },
-  place:     { icon: ICONS.lantern,   title: 'New Place',      subtitle: 'Hang a lantern on the tree',      accent: '#ffe890' },
-  milestone: { icon: ICONS.magicBook, title: 'New Milestone',  subtitle: 'Mark this moment in our story',   accent: '#f2a8b8' },
+  memory:    { icon: ICONS.memories, title: 'New Memory',    subtitle: 'Preserve this moment forever',   accent: '#f2a8b8' },
+  song:      { icon: ICONS.petal,    title: 'New Song',      subtitle: 'Add a melody to our story',      accent: '#ffb450' },
+  poem:      { icon: ICONS.letter,   title: 'New Poem',      subtitle: 'Write something beautiful',      accent: '#c9bfe8' },
+  whisper:   { icon: ICONS.petal,    title: 'New Whisper',   subtitle: 'A quiet thought for the wind',   accent: '#a8d8a0' },
+  letter:    { icon: ICONS.letter,   title: 'New Letter',    subtitle: 'Words sealed with love',         accent: '#d4aaff' },
+  wish:      { icon: ICONS.lantern,  title: 'New Wish',      subtitle: 'Hang a lantern into the future', accent: '#a8d8a0' },
+  place:     { icon: ICONS.map,      title: 'New Place',     subtitle: 'Mark a footprint on the map',    accent: '#ffe890' },
+  milestone: { icon: ICONS.memories, title: 'New Milestone', subtitle: 'Mark this moment in our story',  accent: '#f2a8b8' },
 }
 
 export default function RightPanel() {
@@ -121,6 +121,7 @@ export default function RightPanel() {
         <motion.aside
           key={rightPanel}
           aria-label={cfg.title}
+          className="w-[clamp(300px,30vw,420px)] max-[480px]:w-[92vw]"
           style={{
             position: 'fixed',
             right: 0,
@@ -129,8 +130,6 @@ export default function RightPanel() {
             zIndex: 35,
             display: 'flex',
             flexDirection: 'column',
-            // Max 30% per spec — world must always be visible
-            width: 'clamp(300px, 30vw, 420px)',
             // Transparent enough to feel like glass floating over the world
             background: 'linear-gradient(160deg, rgba(8,5,22,0.82) 0%, rgba(4,3,14,0.88) 100%)',
             backdropFilter: 'blur(48px)',

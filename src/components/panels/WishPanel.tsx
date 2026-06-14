@@ -26,13 +26,14 @@ export default function WishPanel({ item }: Readonly<Props>) {
         animate={{ opacity: 1, y: 0 }}
         style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 20 }}
       >
-        <motion.span
-          style={{ fontSize: 32, display: 'inline-block', filter: `drop-shadow(0 0 10px ${accent}66)` }}
+        <motion.div
+          style={{ display: 'inline-block', filter: `drop-shadow(0 0 10px ${accent}66)` }}
           animate={completed ? { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] } : {}}
           transition={{ duration: 0.5 }}
         >
-          {completed ? '🌸' : '🌱'}
-        </motion.span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/ui/lantern.png" alt="" aria-hidden="true" style={{ width: 32, height: 32, objectFit: 'contain', opacity: completed ? 1 : 0.5 }} />
+        </motion.div>
         <div>
           <p className="font-serif" style={{ fontSize: 18, fontWeight: 300, color: '#f0eefc', lineHeight: 1.3 }}>
             {title}

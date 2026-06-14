@@ -132,7 +132,8 @@ export default function SongPanel({ item }: Readonly<Props>) {
               cursor: 'pointer',
             }}
           >
-            <span style={{ fontSize: 16, opacity: 0.3 }}>🌸</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/assets/ui/petal.png" alt="" aria-hidden="true" style={{ width: 16, height: 16, objectFit: 'contain', opacity: 0.3 }} />
           </div>
         ))}
       </div>

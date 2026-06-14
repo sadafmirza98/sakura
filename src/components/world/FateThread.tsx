@@ -27,8 +27,8 @@ import { useContentStore, type ContentItem } from '@/store/useContentStore'
 /* ─────────────────────────────────────────────────────────────────────
    BOARD POSITION — matches the wooden board on the far right
 ───────────────────────────────────────────────────────────────────── */
-const BOARD_LEFT  = '88%'
-const BOARD_TOP   = '62%'
+const BOARD_LEFT  = '95%'
+const BOARD_TOP   = '72%'
 const BOARD_W     = 180     // px
 const BOARD_H     = 340     // px
 
@@ -37,16 +37,39 @@ const BOARD_H     = 340     // px
    Idle magical notes that briefly appear on the board
 ───────────────────────────────────────────────────────────────────── */
 
+const IDLE_NOTES = ['06 Dec 2020', 'First Conversation', 'Engagement']
+
+const chalkTextStyle: React.CSSProperties = {
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontStyle: 'italic',
+  fontSize: 13,
+  letterSpacing: '0.04em',
+  color: 'rgba(245,238,210,0.6)',
+  textShadow: '0 0 16px rgba(232,201,122,0.5)',
+  whiteSpace: 'nowrap',
+  display: 'block',
+  textAlign: 'center',
+  position: 'absolute',
+  top: '18%',
+  left: '50%',
+  transform: 'translateX(-50%)',
+}
+
 export function BoardAmbient() {
-  const { timelineOpen } = useUIStore()
+  const { timelineOpen, boardHovered } = useUIStore()
   const [noteVisible, setNoteVisible] = useState(false)
-  const [hovered, setHovered] = useState(false)
+  const [noteText, setNoteText] = useState(IDLE_NOTES[0])
+  const noteIndexRef = useRef(0)
 
   useEffect(() => {
     if (timelineOpen) return
     const tick = () => {
+      setNoteText(IDLE_NOTES[noteIndexRef.current])
       setNoteVisible(true)
-      setTimeout(() => setNoteVisible(false), 2200)
+      setTimeout(() => {
+        setNoteVisible(false)
+        noteIndexRef.current = (noteIndexRef.current + 1) % IDLE_NOTES.length
+      }, 2200)
     }
     tick()
     const id = setInterval(tick, 10000)
@@ -56,8 +79,6 @@ export function BoardAmbient() {
   return (
     <div
       aria-hidden="true"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         position: 'fixed',
         left: BOARD_LEFT,
@@ -71,7 +92,7 @@ export function BoardAmbient() {
     >
       {/* Warm golden glow on hover */}
       <motion.div
-        animate={{ opacity: hovered ? 1 : 0 }}
+        animate={{ opacity: boardHovered && !timelineOpen ? 1 : 0 }}
         transition={{ duration: 0.4 }}
         style={{
           position: 'absolute',
@@ -82,7 +103,24 @@ export function BoardAmbient() {
         }}
       />
 
-      {/* Idle note */}
+      {/* Lantern brightening overlay — targets the painted lantern above-left of board */}
+      <motion.div
+        aria-hidden="true"
+        animate={{ opacity: boardHovered && !timelineOpen ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          position: 'absolute',
+          left: -60,
+          top: -120,
+          width: 80,
+          height: 110,
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          background: 'radial-gradient(ellipse at 50% 60%, rgba(255,220,100,0.38) 0%, rgba(232,201,122,0.14) 55%, transparent 100%)',
+        }}
+      />
+
+      {/* Idle note — rotates through IDLE_NOTES */}
       <AnimatePresence>
         {noteVisible && !timelineOpen && (
           <motion.div
@@ -111,45 +149,39 @@ export function BoardAmbient() {
               color: 'rgba(245,238,210,0.82)',
               letterSpacing: '0.04em',
             }}>
-              06 Dec 2020
+              {noteText}
             </span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Hover text overlay */}
+      {/* Chalk text — "Dreams we're building" when idle, "Our Story So Far" on hover */}
       <AnimatePresence>
-        {hovered && !timelineOpen && (
-          <motion.div
+        {!boardHovered && !timelineOpen && (
+          <motion.span
+            key="chalk-a"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'absolute',
-              top: '18%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              textAlign: 'center',
-              pointerEvents: 'none',
-            }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
+            style={chalkTextStyle}
           >
-            <motion.span
-              animate={{ opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 2.5, times: [0, 0.2, 0.8, 1], repeat: Infinity, repeatDelay: 0.5 }}
-              style={{
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontStyle: 'italic',
-                fontSize: 13,
-                color: 'rgba(245,238,210,0.75)',
-                textShadow: '0 0 20px rgba(232,201,122,0.7)',
-                whiteSpace: 'nowrap',
-                display: 'block',
-              }}
-            >
-              Our Story So Far
-            </motion.span>
-          </motion.div>
+            Dreams we&apos;re building
+          </motion.span>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {boardHovered && !timelineOpen && (
+          <motion.span
+            key="chalk-b"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            style={{ ...chalkTextStyle, color: 'rgba(245,238,210,0.9)', textShadow: '0 0 20px rgba(232,201,122,0.8)' }}
+          >
+            Our Story So Far
+          </motion.span>
         )}
       </AnimatePresence>
     </div>
@@ -161,8 +193,7 @@ export function BoardAmbient() {
 ───────────────────────────────────────────────────────────────────── */
 
 export function BoardHitZone() {
-  const { timelineOpen, openTimeline, closeTimeline } = useUIStore()
-  const [hovered, setHovered] = useState(false)
+  const { timelineOpen, openTimeline, closeTimeline, setBoardHovered } = useUIStore()
 
   return (
     <div
@@ -178,8 +209,8 @@ export function BoardHitZone() {
     >
       <button
         onClick={() => timelineOpen ? closeTimeline() : openTimeline()}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={() => setBoardHovered(true)}
+        onMouseLeave={() => setBoardHovered(false)}
         aria-label={timelineOpen ? 'Close timeline' : 'Open our story timeline'}
         aria-expanded={timelineOpen}
         style={{
@@ -189,21 +220,6 @@ export function BoardHitZone() {
           border: 'none',
           cursor: 'pointer',
           outline: 'none',
-        }}
-      />
-
-      {/* Hover cursor glow — radiates from the board */}
-      <motion.div
-        aria-hidden="true"
-        animate={{ opacity: hovered && !timelineOpen ? 1 : 0 }}
-        transition={{ duration: 0.35 }}
-        style={{
-          position: 'absolute',
-          inset: '-25% -18%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(232,201,122,0.22) 0%, rgba(255,180,80,0.08) 55%, transparent 100%)',
-          pointerEvents: 'none',
-          zIndex: -1,
         }}
       />
     </div>
@@ -223,8 +239,11 @@ function formatMemDate(raw: unknown): string {
 
 function isMilestone(mem: ContentItem): boolean {
   const t = (mem.type as string) ?? ''
+  if (t === 'timeline-event') return false
   const title = ((mem.title as string) ?? '').toLowerCase()
-  return t === 'milestone' || ['proposal', 'engagement', 'wedding', 'anniversary', 'first meeting', 'first trip'].some(k => title.includes(k))
+  return t === 'milestone'
+    || !!(mem.isMilestone as boolean)
+    || ['proposal', 'engagement', 'wedding', 'anniversary', 'first meeting', 'first trip'].some(k => title.includes(k))
 }
 
 // Generate a smooth bezier path across the screen for the fate thread
@@ -240,6 +259,11 @@ function buildThreadPath(W: number, H: number): string {
 // Sample evenly spaced points along a cubic bezier path
 function samplePath(el: SVGPathElement, count: number): Array<{ x: number; y: number }> {
   const total = el.getTotalLength()
+  if (count <= 0) return []
+  if (count === 1) {
+    const pt = el.getPointAtLength(0)
+    return [{ x: pt.x, y: pt.y }]
+  }
   return Array.from({ length: count }, (_, i) => {
     const pt = el.getPointAtLength((i / (count - 1)) * total)
     return { x: pt.x, y: pt.y }
@@ -314,17 +338,32 @@ function MemoryNote({ mem, x, y, index, milestone, onSelect }: NoteProps) {
             : hov ? 'rgba(242,168,184,0.7)' : 'rgba(242,168,184,0.28)'}
           strokeWidth={milestone ? 1.5 : 0.8}
         />
-        {/* Milestone star marker */}
+        {/* Milestone ribbon */}
         {milestone && (
-          <motion.text
-            x={0} y={hangDir === -1 ? -40 : 13}
-            textAnchor="middle"
-            style={{ fontSize: 11 }}
-            animate={{ opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            ✦
-          </motion.text>
+          <>
+            <rect
+              x={-52} y={hangDir === -1 ? -54 : 0}
+              width={104} height={8}
+              rx={2}
+              fill="rgba(232,201,122,0.35)"
+            />
+            <rect
+              x={-52} y={hangDir === -1 ? -48 : 6}
+              width={104} height={2}
+              fill="rgba(232,201,122,0.55)"
+            />
+          </>
+        )}
+        {/* Milestone icon — memories.png via SVG image */}
+        {milestone && (
+          <image
+            href="/assets/ui/memories.png"
+            x={-8}
+            y={hangDir === -1 ? -46 : 6}
+            width={16}
+            height={16}
+            preserveAspectRatio="xMidYMid meet"
+          />
         )}
         {/* Title */}
         <text
@@ -408,62 +447,347 @@ function MemoryDetail({
   const photoUrl = (mem.photoUrl as string) ?? ''
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.85, rotateX: -12 }}
-      animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-      exit={{ opacity: 0, scale: 0.88, rotateX: 8 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      onClick={(e) => e.stopPropagation()}
+    <div
       style={{
         position: 'fixed',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
+        inset: 0,
         zIndex: 55,
-        width: 'clamp(280px, 38vw, 460px)',
-        maxHeight: '70vh',
-        overflowY: 'auto',
-        background: 'linear-gradient(160deg, rgba(14,10,32,0.96) 0%, rgba(8,6,22,0.98) 100%)',
-        backdropFilter: 'blur(60px)',
-        WebkitBackdropFilter: 'blur(60px)',
-        border: '1px solid rgba(242,168,184,0.18)',
-        borderRadius: 20,
-        padding: '28px 28px 32px',
-        boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        pointerEvents: 'none',
       }}
     >
-      {/* Accent bar */}
-      <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, rgba(232,201,122,0.8), transparent)', margin: '-28px -28px 22px', borderRadius: '20px 20px 0 0' }} />
-
-      {/* Close */}
-      <button
-        onClick={onClose}
-        style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 28, height: 28, cursor: 'pointer', color: 'rgba(240,238,252,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85, rotateX: -12 }}
+        animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+        exit={{ opacity: 0, scale: 0.88, rotateX: 8 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          pointerEvents: 'auto',
+          width: 'min(460px, 100%)',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          background: 'linear-gradient(160deg, rgba(14,10,32,0.96) 0%, rgba(8,6,22,0.98) 100%)',
+          backdropFilter: 'blur(60px)',
+          WebkitBackdropFilter: 'blur(60px)',
+          border: '1px solid rgba(242,168,184,0.18)',
+          borderRadius: 20,
+          padding: '28px 28px 32px',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
+        }}
       >
-        ×
-      </button>
+        {/* Accent bar */}
+        <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, rgba(232,201,122,0.8), transparent)', margin: '-28px -28px 22px', borderRadius: '20px 20px 0 0' }} />
 
-      {photoUrl && (
-        <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', marginBottom: 18, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photoUrl} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 28, height: 28, cursor: 'pointer', color: 'rgba(240,238,252,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}
+        >
+          ×
+        </button>
+
+        {photoUrl && (
+          <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', marginBottom: 18, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoUrl} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
+
+        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 300, fontSize: 22, color: '#f0eefc', lineHeight: 1.2, marginBottom: 8 }}>
+          {title}
+        </h2>
+        {date && (
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(232,201,122,0.7)', letterSpacing: '0.06em', marginBottom: 16 }}>
+            {date}
+          </p>
+        )}
+        {story && (
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(240,238,252,0.65)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+            {story}
+          </p>
+        )}
+      </motion.div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   MEMORY SPOOL — golden spool at start of thread to create new memories
+───────────────────────────────────────────────────────────────────── */
+
+interface SpoolProps {
+  readonly x: number
+  readonly y: number
+  readonly onWeave: () => void
+}
+
+function MemorySpool({ x, y, onWeave }: SpoolProps) {
+  const [hov, setHov] = useState(false)
+  const [unravelling, setUnravelling] = useState(false)
+
+  const handleClick = () => {
+    if (unravelling) return
+    setUnravelling(true)
+    setTimeout(onWeave, 550)
+  }
+
+  return (
+    <g transform={`translate(${x}, ${y})`}>
+    <motion.g
+      animate={{ scale: unravelling ? 0 : 1, opacity: unravelling ? 0 : 1 }}
+      transition={{ duration: 0.5, ease: [0.4, 0, 1, 1] }}
+      style={{ cursor: 'pointer' }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      onClick={handleClick}
+    >
+      {/* Outer glow */}
+      <motion.circle
+        r={28}
+        fill="transparent"
+        animate={{ opacity: hov ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        style={{ filter: 'blur(8px)' }}
+      />
+      {/* Outer ring */}
+      <circle r={18} fill="rgba(255,248,220,0.12)" stroke="rgba(232,201,122,0.7)" strokeWidth={1.2} />
+      {/* Middle ring — sakura dashed */}
+      <circle r={12} fill="transparent" stroke="rgba(242,168,184,0.55)" strokeWidth={1} strokeDasharray="4 3" />
+      {/* Inner ring */}
+      <circle r={6} fill="transparent" stroke="rgba(232,201,122,0.8)" strokeWidth={1.2} />
+      {/* Centre dot */}
+      <motion.circle
+        r={3}
+        fill="rgba(232,201,122,0.95)"
+        animate={{ scale: hov ? [1, 1.4, 1] : 1 }}
+        transition={{ duration: 1.2, repeat: hov ? Infinity : 0 }}
+      />
+      {/* Hover particles */}
+      {hov && [0, 1, 2, 3, 4, 5].map((j) => (
+        <motion.circle
+          key={j}
+          r={1.5}
+          fill="rgba(242,168,184,0.7)"
+          initial={{ x: 0, y: 0, opacity: 0.9 }}
+          animate={{
+            x: Math.cos((j / 6) * Math.PI * 2) * 26,
+            y: Math.sin((j / 6) * Math.PI * 2) * 26,
+            opacity: 0,
+          }}
+          transition={{ duration: 1.2, delay: j * 0.1, repeat: Infinity, ease: 'easeOut' }}
+        />
+      ))}
+      {/* Label */}
+      <AnimatePresence>
+        {hov && (
+          <motion.text
+            y={32}
+            textAnchor="middle"
+            fill="rgba(232,201,122,0.9)"
+            style={{ fontFamily: '"Playfair Display", Georgia, serif', fontStyle: 'italic', fontSize: 11, pointerEvents: 'none' }}
+            initial={{ opacity: 0, y: 36 }}
+            animate={{ opacity: 1, y: 32 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            Weave New Memory
+          </motion.text>
+        )}
+      </AnimatePresence>
+    </motion.g>
+    </g>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   BLANK NOTE EDITOR — parchment paper in-place memory creator
+───────────────────────────────────────────────────────────────────── */
+
+interface BlankNoteEditorProps {
+  readonly onSave: () => void
+  readonly onCancel: () => void
+}
+
+function BlankNoteEditor({ onSave, onCancel }: BlankNoteEditorProps) {
+  const { add } = useContentStore()
+  const songs  = useContentStore(s => s.songs)
+  const places = useContentStore(s => s.places)
+
+  const [title, setTitle]         = useState('')
+  const [date, setDate]           = useState('')
+  const [story, setStory]         = useState('')
+  const [tags, setTags]           = useState('')
+  const [relatedSong, setRelatedSong]   = useState('')
+  const [relatedPlace, setRelatedPlace] = useState('')
+  const [isMilestoneToggle, setIsMilestoneToggle] = useState(false)
+  const [saving, setSaving]       = useState(false)
+
+  const inkStyle: React.CSSProperties = {
+    width: '100%', background: 'transparent', border: 'none',
+    borderBottom: '1px solid rgba(160,120,60,0.3)', outline: 'none',
+    color: 'rgba(40,30,10,0.85)', fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: 14, padding: '6px 2px', marginBottom: 12,
+  }
+  const labelStyle: React.CSSProperties = {
+    display: 'block', fontSize: 9, letterSpacing: '0.12em',
+    textTransform: 'uppercase', color: 'rgba(100,80,40,0.55)', marginBottom: 4,
+  }
+
+  const handleSave = async () => {
+    if (saving) return
+    setSaving(true)
+    try {
+      await add('memories', {
+        title: title.trim() || 'Untitled Memory',
+        date,
+        story,
+        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        relatedSong: relatedSong || undefined,
+        relatedPlace: relatedPlace || undefined,
+        isMilestone: isMilestoneToggle,
+        type: isMilestoneToggle ? 'milestone' : 'memory',
+      })
+      onSave()
+    } catch {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 48,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        pointerEvents: 'none',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85, rotateX: -12 }}
+        animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+        exit={{ opacity: 0, scale: 0.75, rotateX: 12, y: 20 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          pointerEvents: 'auto',
+          width: 'min(520px, 100%)',
+          maxHeight: '85vh', overflowY: 'auto',
+          background: 'linear-gradient(165deg, rgba(255,250,235,0.97) 0%, rgba(250,244,220,0.99) 100%)',
+          backgroundImage: `
+            linear-gradient(165deg, rgba(255,250,235,0.97) 0%, rgba(250,244,220,0.99) 100%),
+            repeating-linear-gradient(transparent, transparent 27px, rgba(200,170,100,0.12) 27px, rgba(200,170,100,0.12) 28px)
+          `,
+          border: '1px solid rgba(200,170,100,0.35)',
+          borderRadius: 6,
+          boxShadow: '0 40px 100px rgba(0,0,0,0.55), 0 0 0 1px rgba(232,201,122,0.2)',
+          padding: '28px 32px 32px',
+          perspective: 600,
+        }}
+      >
+        {/* Paper fold top-right */}
+        <div style={{
+          position: 'absolute', top: 0, right: 0,
+          width: 0, height: 0,
+          borderLeft: '22px solid rgba(200,170,100,0.3)',
+          borderBottom: '22px solid transparent',
+        }} />
+
+        <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontStyle: 'italic', fontSize: 17, color: 'rgba(80,50,20,0.8)', marginBottom: 20, textAlign: 'center' }}>
+          a new memory…
+        </p>
+
+        <label htmlFor="bn-title" style={labelStyle}>Memory Title</label>
+        <input id="bn-title" style={inkStyle} placeholder="Name this memory…" value={title} onChange={e => setTitle(e.target.value)} />
+
+        <label htmlFor="bn-date" style={labelStyle}>Date</label>
+        <input id="bn-date" style={{ ...inkStyle, fontFamily: 'Inter, sans-serif', fontSize: 13 }} type="date" value={date} onChange={e => setDate(e.target.value)} />
+
+        <label htmlFor="bn-story" style={labelStyle}>Story</label>
+        <textarea
+          id="bn-story"
+          style={{ ...inkStyle, resize: 'none', lineHeight: 1.8, minHeight: 90, borderBottom: 'none', border: '1px solid rgba(160,120,60,0.2)', borderRadius: 4, padding: '6px 8px' }}
+          rows={4}
+          placeholder="What do you want to remember forever…"
+          value={story}
+          onChange={e => setStory(e.target.value)}
+        />
+
+        <label htmlFor="bn-tags" style={{ ...labelStyle, marginTop: 12 }}>Tags</label>
+        <input id="bn-tags" style={{ ...inkStyle, fontFamily: 'Inter, sans-serif', fontSize: 12 }} placeholder="first times, rain, laughter…" value={tags} onChange={e => setTags(e.target.value)} />
+
+        {songs.length > 0 && (
+          <>
+            <label htmlFor="bn-song" style={labelStyle}>Related Song</label>
+            <select id="bn-song" style={{ ...inkStyle, fontFamily: 'Inter, sans-serif', fontSize: 12, cursor: 'pointer' }} value={relatedSong} onChange={e => setRelatedSong(e.target.value)}>
+              <option value="">None</option>
+              {songs.map(s => <option key={s.id} value={s.id}>{(s.title as string) ?? s.id}</option>)}
+            </select>
+          </>
+        )}
+
+        {places.length > 0 && (
+          <>
+            <label htmlFor="bn-place" style={labelStyle}>Related Place</label>
+            <select id="bn-place" style={{ ...inkStyle, fontFamily: 'Inter, sans-serif', fontSize: 12, cursor: 'pointer' }} value={relatedPlace} onChange={e => setRelatedPlace(e.target.value)}>
+              <option value="">None</option>
+              {places.map(p => <option key={p.id} value={p.id}>{(p.place as string) ?? (p.name as string) ?? p.id}</option>)}
+            </select>
+          </>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0' }}>
+          <input
+            id="milestone-toggle"
+            type="checkbox"
+            checked={isMilestoneToggle}
+            onChange={e => setIsMilestoneToggle(e.target.checked)}
+            style={{ accentColor: '#e8c97a', width: 16, height: 16, cursor: 'pointer' }}
+          />
+          <label htmlFor="milestone-toggle" style={{ ...labelStyle, textTransform: 'none', fontSize: 12, letterSpacing: '0.04em', marginBottom: 0, cursor: 'pointer', color: 'rgba(100,80,40,0.7)' }}>
+            This is a milestone
+          </label>
         </div>
-      )}
 
-      <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 300, fontSize: 22, color: '#f0eefc', lineHeight: 1.2, marginBottom: 8 }}>
-        {title}
-      </h2>
-      {date && (
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: 'rgba(232,201,122,0.7)', letterSpacing: '0.06em', marginBottom: 16 }}>
-          {date}
-        </p>
-      )}
-      {story && (
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(240,238,252,0.65)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-          {story}
-        </p>
-      )}
-    </motion.div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+          <motion.button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            whileHover={{ opacity: 0.9 }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              flex: 1, padding: '11px 16px', borderRadius: 4, cursor: saving ? 'not-allowed' : 'pointer',
+              background: 'rgba(200,150,60,0.15)', border: '1px solid rgba(200,150,60,0.4)',
+              color: 'rgba(100,70,20,0.85)', fontFamily: '"Playfair Display", Georgia, serif',
+              fontStyle: 'italic', fontSize: 13, opacity: saving ? 0.6 : 1,
+            }}
+          >
+            fold this memory into our story
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={onCancel}
+            whileHover={{ opacity: 0.7 }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              padding: '11px 16px', borderRadius: 4, cursor: 'pointer',
+              background: 'transparent', border: '1px solid rgba(160,120,60,0.25)',
+              color: 'rgba(100,80,40,0.5)', fontSize: 12, fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            cancel
+          </motion.button>
+        </div>
+      </motion.div>
+    </div>
   )
 }
 
@@ -474,8 +798,10 @@ function MemoryDetail({
 export default function FateThreadOverlay() {
   const { timelineOpen, closeTimeline } = useUIStore()
   const { memories } = useContentStore()
-  const [phase, setPhase] = useState<'idle' | 'particles' | 'thread'>('idle')
+  const [phase, setPhase] = useState<'idle' | 'darkening' | 'zoom' | 'particles' | 'thread'>('idle')
   const [selectedMem, setSelectedMem] = useState<ContentItem | null>(null)
+  const [creatingMemory, setCreatingMemory] = useState(false)
+  const [threadPulsing, setThreadPulsing] = useState(false)
   const [dimensions, setDimensions] = useState({ W: 1440, H: 900 })
   const pathRef = useRef<SVGPathElement>(null)
   const [nodePositions, setNodePositions] = useState<Array<{ x: number; y: number }>>([])
@@ -483,12 +809,15 @@ export default function FateThreadOverlay() {
   // Drive phase transitions
   useEffect(() => {
     if (timelineOpen) {
-      const t1 = setTimeout(() => setPhase('particles'), 400)
-      const t2 = setTimeout(() => setPhase('thread'), 1200)
-      return () => { clearTimeout(t1); clearTimeout(t2) }
+      setPhase('darkening')
+      const t1 = setTimeout(() => setPhase('zoom'),      300)
+      const t2 = setTimeout(() => setPhase('particles'), 800)
+      const t3 = setTimeout(() => setPhase('thread'),   1400)
+      return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
     } else {
       setPhase('idle')
       setSelectedMem(null)
+      setCreatingMemory(false)
     }
   }, [timelineOpen])
 
@@ -504,7 +833,7 @@ export default function FateThreadOverlay() {
   useEffect(() => {
     if (phase !== 'thread' || !pathRef.current) return
     const el = pathRef.current
-    const count = Math.min(memories.length, 12) + 1  // +1 for future node
+    const count = Math.min(memories.length, 12) + 1
     const positions = samplePath(el, count)
     setNodePositions(positions)
   }, [phase, memories.length])
@@ -522,12 +851,22 @@ export default function FateThreadOverlay() {
     closeTimeline()
   }, [closeTimeline])
 
+  const handleMemorySaved = useCallback(() => {
+    setCreatingMemory(false)
+    setThreadPulsing(true)
+    setTimeout(() => setThreadPulsing(false), 1200)
+  }, [])
+
   const { W, H } = dimensions
   const threadPath = buildThreadPath(W, H)
 
-  // Board origin for particle origin (far right)
-  const boardX = W * 0.88
-  const boardY = H * 0.62
+  // Board origin matches updated constants
+  const boardX = W * 0.95
+  const boardY = H * 0.72
+
+  // Spool position — left edge of the thread, before first node
+  const spoolX = nodePositions.length > 0 ? Math.max(60, (nodePositions[0]?.x ?? 120) - 80) : W * 0.06
+  const spoolY = nodePositions.length > 0 ? (nodePositions[0]?.y ?? H * 0.5) : H * 0.5
 
   return (
     <>
@@ -541,60 +880,63 @@ export default function FateThreadOverlay() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7 }}
-              onClick={() => !selectedMem && handleClose()}
+              onClick={() => !selectedMem && !creatingMemory && handleClose()}
               aria-hidden="true"
               style={{
                 position: 'fixed', inset: 0, zIndex: 40,
                 background: 'rgba(2,1,10,0.82)',
                 backdropFilter: 'blur(3px)',
                 WebkitBackdropFilter: 'blur(3px)',
+                cursor: 'default',
               }}
             />
 
-            {/* ── Board zoom + chalk dissolve ── */}
-            <motion.div
-              key="board-zoom"
-              initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-              animate={
-                phase === 'particles' || phase === 'thread'
-                  ? { opacity: 0, scale: 2.2, x: W * 0.12, y: -H * 0.08 }
-                  : { opacity: 1, scale: 1, x: 0, y: 0 }
-              }
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              aria-hidden="true"
-              style={{
-                position: 'fixed',
-                left: BOARD_LEFT,
-                top: BOARD_TOP,
-                transform: 'translate(-50%, -50%)',
-                zIndex: 41,
-                pointerEvents: 'none',
-                width: BOARD_W,
-                height: BOARD_H,
-              }}
-            >
-              {/* Chalk text lines dissolve */}
-              {['Dreams we\'re building', 'Travel the world', 'Our little home', 'Watch the aurora', 'Grow old together'].map((line, i) => (
-                <motion.p
-                  key={line}
-                  initial={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  animate={phase !== 'idle' ? { opacity: 0, y: -20 + i * 4, filter: 'blur(6px)' } : {}}
-                  transition={{ duration: 0.5, delay: i * 0.08 }}
-                  style={{
-                    fontFamily: '"Playfair Display", Georgia, serif',
-                    fontStyle: 'italic',
-                    fontSize: 12,
-                    color: 'rgba(245,238,210,0.6)',
-                    textAlign: 'center',
-                    margin: `${20 + i * 44}px 0 0`,
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  {line}
-                </motion.p>
-              ))}
-            </motion.div>
+            {/* ── Board zoom + 3D swing + chalk dissolve ── */}
+            <div style={{ perspective: 800, perspectiveOrigin: '50% 50%', position: 'fixed', inset: 0, zIndex: 41, pointerEvents: 'none' }}>
+              <motion.div
+                key="board-zoom"
+                initial={{ opacity: 1, scale: 1, rotateY: 0, x: 0, y: 0 }}
+                animate={
+                  phase === 'zoom'
+                    ? { opacity: 0.85, scale: 1.6, rotateY: 12, x: W * 0.06, y: -H * 0.04 }
+                    : phase === 'particles' || phase === 'thread'
+                    ? { opacity: 0,    scale: 2.2, rotateY: 20, x: W * 0.12, y: -H * 0.08 }
+                    : { opacity: 1,    scale: 1,   rotateY: 0,  x: 0,         y: 0 }
+                }
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transformTemplate={(_, generated) => `translate(-50%, -50%) ${generated}`}
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  left: BOARD_LEFT,
+                  top: BOARD_TOP,
+                  width: BOARD_W,
+                  height: BOARD_H,
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {['Dreams we\'re building', 'Travel the world', 'Our little home', 'Watch the aurora', 'Grow old together'].map((line, i) => (
+                  <motion.p
+                    key={line}
+                    initial={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    animate={phase !== 'idle' && phase !== 'darkening' ? { opacity: 0, y: -20 + i * 4, filter: 'blur(6px)' } : {}}
+                    transition={{ duration: 0.5, delay: i * 0.08 }}
+                    style={{
+                      fontFamily: '"Playfair Display", Georgia, serif',
+                      fontStyle: 'italic',
+                      fontSize: 12,
+                      color: 'rgba(245,238,210,0.6)',
+                      textAlign: 'center',
+                      margin: `${20 + i * 44}px 0 0`,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {line}
+                  </motion.p>
+                ))}
+              </motion.div>
+            </div>
 
             {/* ── Emerging thread particles ── */}
             <AnimatePresence>
@@ -628,7 +970,7 @@ export default function FateThreadOverlay() {
               )}
             </AnimatePresence>
 
-            {/* ── Fate thread + memory nodes ── */}
+            {/* ── Fate thread + memory nodes + spool ── */}
             <AnimatePresence>
               {phase === 'thread' && (
                 <motion.div
@@ -642,10 +984,9 @@ export default function FateThreadOverlay() {
                   <svg
                     width={W}
                     height={H}
-                    style={{ position: 'absolute', inset: 0, overflow: 'visible' }}
+                    style={{ position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'auto' }}
                   >
                     <defs>
-                      {/* Glowing thread gradient */}
                       <linearGradient id="threadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%"   stopColor="rgba(242,168,184,0.8)" />
                         <stop offset="35%"  stopColor="rgba(232,201,122,0.95)" />
@@ -658,7 +999,7 @@ export default function FateThreadOverlay() {
                       </filter>
                     </defs>
 
-                    {/* Past thread — solid glowing line */}
+                    {/* Past thread */}
                     <motion.path
                       ref={pathRef}
                       d={threadPath}
@@ -667,8 +1008,18 @@ export default function FateThreadOverlay() {
                       strokeWidth={2.5}
                       filter="url(#threadGlow)"
                       initial={{ pathLength: 0, opacity: 0 }}
-                      animate={{ pathLength: 1, opacity: 1 }}
-                      transition={{ duration: 1.8, ease: 'easeInOut' }}
+                      animate={{
+                        pathLength: 1,
+                        opacity: 1,
+                        filter: threadPulsing
+                          ? [
+                              'drop-shadow(0 0 4px rgba(242,168,184,0.6))',
+                              'drop-shadow(0 0 20px rgba(232,201,122,1.0)) drop-shadow(0 0 40px rgba(242,168,184,0.7))',
+                              'drop-shadow(0 0 4px rgba(242,168,184,0.6))',
+                            ]
+                          : 'drop-shadow(0 0 3px rgba(242,168,184,0.3))',
+                      }}
+                      transition={{ duration: threadPulsing ? 1.2 : 1.8, ease: 'easeInOut' }}
                     />
 
                     {/* Thread glow bloom */}
@@ -682,7 +1033,7 @@ export default function FateThreadOverlay() {
                       transition={{ duration: 2, ease: 'easeInOut', delay: 0.1 }}
                     />
 
-                    {/* Future path — dashed, dimmer */}
+                    {/* Future path */}
                     <motion.path
                       d={`M ${W * 0.88} ${H * 0.5 - 20} C ${W * 0.94} ${H * 0.5 - 50} ${W * 0.97} ${H * 0.5} ${W} ${H * 0.5 - 15}`}
                       fill="none"
@@ -694,10 +1045,8 @@ export default function FateThreadOverlay() {
                       transition={{ duration: 1.2, ease: 'easeInOut', delay: 1.8 }}
                     />
 
-                    {/* Future label */}
                     <motion.text
-                      x={W - 80}
-                      y={H * 0.5 - 32}
+                      x={W - 80} y={H * 0.5 - 32}
                       textAnchor="middle"
                       fill="rgba(201,191,232,0.45)"
                       style={{ fontFamily: '"Playfair Display", Georgia, serif', fontStyle: 'italic', fontSize: 11 }}
@@ -708,7 +1057,7 @@ export default function FateThreadOverlay() {
                       still unwritten…
                     </motion.text>
 
-                    {/* Memory nodes — render after path is sampled */}
+                    {/* Memory nodes */}
                     {nodePositions.length > 0 && sortedMems.map((mem, i) => {
                       const pos = nodePositions[i]
                       if (!pos) return null
@@ -728,7 +1077,16 @@ export default function FateThreadOverlay() {
                       )
                     })}
 
-                    {/* Thread origin star at board */}
+                    {/* Spool — new memory entry point, always visible */}
+                    {!creatingMemory && (
+                      <MemorySpool
+                        x={spoolX}
+                        y={spoolY}
+                        onWeave={() => setCreatingMemory(true)}
+                      />
+                    )}
+
+                    {/* Thread origin star */}
                     <motion.circle
                       cx={0} cy={H * 0.5 + 40} r={5}
                       fill="rgba(232,201,122,0.9)"
@@ -769,7 +1127,17 @@ export default function FateThreadOverlay() {
         )}
       </AnimatePresence>
 
-      {/* ── Selected memory detail — unfolds above timeline ── */}
+      {/* ── Blank note editor — in-place paper ── */}
+      <AnimatePresence>
+        {creatingMemory && (
+          <BlankNoteEditor
+            onSave={handleMemorySaved}
+            onCancel={() => setCreatingMemory(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Selected memory detail ── */}
       <AnimatePresence>
         {selectedMem && (
           <>

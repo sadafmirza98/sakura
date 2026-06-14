@@ -18,6 +18,7 @@ import FateThreadOverlay, { BoardAmbient, BoardHitZone } from '@/components/worl
 // HUD
 import MoonCounter    from '@/components/world/MoonCounter'
 import HoverTooltip   from '@/components/world/HoverTooltip'
+import MobileQuickActions from '@/components/world/MobileQuickActions'
 
 // Content drawer
 import RightPanel     from '@/components/world/RightPanel'
@@ -54,6 +55,7 @@ export default function GardenPage() {
       {/* ── HUD ── */}
       <MoonCounter />
       <HoverTooltip />
+      <MobileQuickActions />
 
       {/* ── Panel backdrop ── */}
       <AnimatePresence>
