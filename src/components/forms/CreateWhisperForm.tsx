@@ -8,7 +8,7 @@ const ACCENT = '#a8d8a0'
 const BLOSSOMS = 0
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreateWhisperForm({ onSave }: Readonly<Props>) {
@@ -23,12 +23,12 @@ export default function CreateWhisperForm({ onSave }: Readonly<Props>) {
     if (saving) return
     setSaving(true)
     try {
-      await add('whispers', { text })
+      const id = await add('whispers', { text })
       if (BLOSSOMS > 0) addBlossoms(BLOSSOMS)
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

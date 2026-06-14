@@ -586,7 +586,7 @@ function ThreadCanvas({ positions, bookX, bookY }: ThreadProps) {
 ───────────────────────────────────────────────────────────────────── */
 
 export default function MemoryRing() {
-  const { bloomOpen, closeBloom, openCreate, createSelectorOpen, closeCreateSelector } = useUIStore()
+  const { bloomOpen, closeBloom, openCreate, openRightPanel, createSelectorOpen, closeCreateSelector } = useUIStore()
   const content = useContentStore()
 
   const [objPositions, setObjPositions] = useState<Array<Pos | null>>(RING_ITEMS.map(() => null))
@@ -612,10 +612,14 @@ export default function MemoryRing() {
     return () => cancelAnimationFrame(id)
   }, [bloomOpen])
 
-  const handleItemClick = useCallback((item: RingItem) => {
+  const handleItemClick = useCallback((item: RingItem, latest: ContentItem | undefined) => {
     if (createSelectorOpen) { closeCreateSelector(); return }
+    if (latest) {
+      openRightPanel(item.type, { id: latest.id })
+      return
+    }
     openCreate(item.type as CreateType)
-  }, [createSelectorOpen, closeCreateSelector, openCreate])
+  }, [createSelectorOpen, closeCreateSelector, openCreate, openRightPanel])
 
   const handleBackdrop = useCallback(() => {
     if (createSelectorOpen) { closeCreateSelector(); return }
@@ -757,9 +761,8 @@ export default function MemoryRing() {
                   key={item.type as string}
                   item={item}
                   index={i}
-                  count={items.length}
                   preview={preview}
-                  onOpen={() => handleItemClick(item)}
+                  onOpen={() => handleItemClick(item, latest)}
                   onPositionChange={(pos) => updatePos(i, pos)}
                 />
               )
@@ -779,13 +782,12 @@ export default function MemoryRing() {
 interface BloomObjectProps {
   readonly item: RingItem
   readonly index: number
-  readonly count: number
   readonly preview: string | null
   readonly onOpen: () => void
   readonly onPositionChange: (pos: Pos | null) => void
 }
 
-function BloomObject({ item, index, count, preview, onOpen, onPositionChange }: BloomObjectProps) {
+function BloomObject({ item, index, preview, onOpen, onPositionChange }: BloomObjectProps) {
   const [hovering, setHovering] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const pos = organicPos(index)
@@ -865,7 +867,6 @@ function BloomObject({ item, index, count, preview, onOpen, onPositionChange }: 
                 : `drop-shadow(0 2px 14px rgba(0,0,0,0.7)) drop-shadow(0 0 5px ${item.accent}44) brightness(0.9)`,
             }}
             transition={{ duration: 0.24 }}
-            style={{ position: 'relative' }}
           >
             <Image
               src={item.asset}
@@ -875,38 +876,6 @@ function BloomObject({ item, index, count, preview, onOpen, onPositionChange }: 
               height={72}
               style={{ width: 72, height: 72, objectFit: 'contain', display: 'block' }}
             />
-
-            {/* Saved-count badge — confirms what's actually been added */}
-            {count > 0 && (
-              <motion.div
-                aria-hidden="true"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                style={{
-                  position: 'absolute',
-                  top: -2,
-                  right: -2,
-                  minWidth: 18,
-                  height: 18,
-                  padding: '0 5px',
-                  borderRadius: 9,
-                  background: item.accent,
-                  color: 'rgba(20,14,40,0.92)',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: 10,
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: `0 2px 10px ${item.accent}99, 0 0 0 2px rgba(10,7,24,0.85)`,
-                  zIndex: 2,
-                }}
-              >
-                {count}
-              </motion.div>
-            )}
           </motion.div>
 
           {/* Label */}

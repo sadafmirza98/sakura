@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
-import { useUIStore } from '@/store/useUIStore'
+import { useUIStore, type CreateType, type RightPanelType } from '@/store/useUIStore'
 import { useContentStore } from '@/store/useContentStore'
 
 // Panel sub-views
@@ -246,12 +246,20 @@ function PanelContent({
   createType,
   item,
 }: Readonly<{
-  type: string | null
-  createType: string | null
+  type: RightPanelType
+  createType: CreateType | null
   item: ReturnType<typeof useContentStore.getState>['memories'][number] | null
 }>) {
-  const { closeRightPanel, closeCreate } = useUIStore()
-  const onSave = () => { closeRightPanel(); closeCreate() }
+  const { closeCreate, openRightPanel, enterScene } = useUIStore()
+  const onSave = (id: string) => {
+    const viewType: RightPanelType = createType === 'milestone' ? 'memory' : createType
+    if (viewType) {
+      enterScene('garden')
+      openRightPanel(viewType, { id })
+    } else {
+      closeCreate()
+    }
+  }
 
   if (type === 'create') {
     if (createType === 'memory')    return <CreateMemoryForm    onSave={onSave} />

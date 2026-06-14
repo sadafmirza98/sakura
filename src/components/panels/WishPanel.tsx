@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import type { ContentItem } from '@/store/useContentStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
+import { useUIStore } from '@/store/useUIStore'
+import { DeleteButton } from './shared'
 
 interface Props {
   item: ContentItem | null
@@ -10,7 +12,10 @@ interface Props {
 const accent = '#a8d8a0'
 
 export default function WishPanel({ item }: Readonly<Props>) {
-  const title       = (item?.title     as string)  ?? 'Unnamed Wish'
+  const { delete: deleteItem } = useContentStore()
+  const { closeRightPanel } = useUIStore()
+
+  const title       = (item?.wish      as string)  ?? (item?.title as string) ?? 'A shared wish'
   const category    = (item?.category  as string)  ?? ''
   const date        = (item?.date      as string)  ?? ''
   const progressNote = (item?.progressNote as string) ?? ''
@@ -106,6 +111,15 @@ export default function WishPanel({ item }: Readonly<Props>) {
         <p className="font-sans" style={{ fontSize: 12, color: 'rgba(201,191,232,0.3)', fontStyle: 'italic' }}>
           Every completed wish blooms on the tree...
         </p>
+      )}
+
+      {item && (
+        <div style={{ marginTop: 20 }}>
+          <DeleteButton
+            label="wish"
+            onDelete={() => { deleteItem('wishes', item.id); closeRightPanel() }}
+          />
+        </div>
       )}
     </div>
   )

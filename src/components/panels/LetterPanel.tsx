@@ -1,6 +1,8 @@
 'use client'
 import { motion } from 'framer-motion'
-import type { ContentItem } from '@/store/useContentStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
+import { useUIStore } from '@/store/useUIStore'
+import { DeleteButton } from './shared'
 
 interface Props {
   item: ContentItem | null
@@ -9,11 +11,23 @@ interface Props {
 const accent = '#d4aaff'
 
 export default function LetterPanel({ item }: Readonly<Props>) {
+  const { delete: deleteItem } = useContentStore()
+  const { closeRightPanel } = useUIStore()
+
   const unlockDate  = (item?.unlockDate as string) ?? ''
-  const text        = (item?.text       as string) ?? ''
+  const text        = (item?.letter     as string) ?? ''
   const sender      = (item?.sender     as string) ?? ''
   const date        = (item?.date       as string) ?? ''
   const openWhen    = (item?.openWhen   as string) ?? ''
+
+  const deleteButton = item && (
+    <div style={{ marginTop: 20 }}>
+      <DeleteButton
+        label="letter"
+        onDelete={() => { deleteItem('letters', item.id); closeRightPanel() }}
+      />
+    </div>
+  )
 
   // Determine locked state
   const isLocked = unlockDate
@@ -22,6 +36,7 @@ export default function LetterPanel({ item }: Readonly<Props>) {
 
   if (isLocked) {
     return (
+      <div>
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -73,6 +88,8 @@ export default function LetterPanel({ item }: Readonly<Props>) {
           </p>
         </div>
       </motion.div>
+      {deleteButton}
+      </div>
     )
   }
 
@@ -142,6 +159,7 @@ export default function LetterPanel({ item }: Readonly<Props>) {
           </div>
         )}
       </motion.div>
+      {deleteButton}
     </div>
   )
 }

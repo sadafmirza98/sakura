@@ -8,7 +8,7 @@ const ACCENT = '#e8c97a'
 const BLOSSOMS = 5
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreateMilestoneForm({ onSave }: Readonly<Props>) {
@@ -27,7 +27,7 @@ export default function CreateMilestoneForm({ onSave }: Readonly<Props>) {
     try {
       // Milestones are stored in 'memories' collection with a type flag,
       // as there is no dedicated 'milestones' Firestore collection in the store.
-      await add('memories', {
+      const id = await add('memories', {
         title: name.trim() || 'Untitled Milestone',
         date,
         story,
@@ -37,7 +37,7 @@ export default function CreateMilestoneForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

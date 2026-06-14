@@ -8,7 +8,7 @@ const ACCENT = '#d4aaff'
 const BLOSSOMS = 3
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreateLetterForm({ onSave }: Readonly<Props>) {
@@ -36,7 +36,7 @@ export default function CreateLetterForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

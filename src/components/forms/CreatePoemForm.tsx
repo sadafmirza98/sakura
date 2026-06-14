@@ -8,7 +8,7 @@ const ACCENT = '#c9bfe8'
 const BLOSSOMS = 2
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreatePoemForm({ onSave }: Readonly<Props>) {
@@ -24,7 +24,7 @@ export default function CreatePoemForm({ onSave }: Readonly<Props>) {
     if (saving) return
     setSaving(true)
     try {
-      await add('poems', {
+      const id = await add('poems', {
         title: title.trim() || 'Untitled Poem',
         poem,
       })
@@ -32,7 +32,7 @@ export default function CreatePoemForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

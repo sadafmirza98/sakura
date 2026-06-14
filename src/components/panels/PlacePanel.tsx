@@ -1,6 +1,8 @@
 'use client'
 import { motion } from 'framer-motion'
-import type { ContentItem } from '@/store/useContentStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
+import { useUIStore } from '@/store/useUIStore'
+import { DeleteButton } from './shared'
 
 interface Props {
   item: ContentItem | null
@@ -9,7 +11,10 @@ interface Props {
 const accent = '#a8d0e8'
 
 export default function PlacePanel({ item }: Readonly<Props>) {
-  const name       = (item?.name       as string)  ?? 'Unknown Place'
+  const { delete: deleteItem } = useContentStore()
+  const { closeRightPanel } = useUIStore()
+
+  const name       = (item?.place      as string)  ?? 'Unnamed Place'
   const country    = (item?.country    as string)  ?? ''
   const notes      = (item?.notes      as string)  ?? ''
   const visited    = (item?.visited    as boolean) ?? false
@@ -94,6 +99,15 @@ export default function PlacePanel({ item }: Readonly<Props>) {
           Map
         </p>
       </div>
+
+      {item && (
+        <div style={{ marginTop: 20 }}>
+          <DeleteButton
+            label="place"
+            onDelete={() => { deleteItem('places', item.id); closeRightPanel() }}
+          />
+        </div>
+      )}
     </div>
   )
 }

@@ -8,7 +8,7 @@ const ACCENT = '#a8d0e8'
 const BLOSSOMS = 0
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreatePlaceForm({ onSave }: Readonly<Props>) {
@@ -39,7 +39,7 @@ export default function CreatePlaceForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

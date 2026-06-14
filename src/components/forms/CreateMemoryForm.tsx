@@ -8,7 +8,7 @@ const ACCENT = '#f2a8b8'
 const BLOSSOMS = 1
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreateMemoryForm({ onSave }: Readonly<Props>) {
@@ -26,7 +26,7 @@ export default function CreateMemoryForm({ onSave }: Readonly<Props>) {
     if (saving) return
     setSaving(true)
     try {
-      await add('memories', {
+      const id = await add('memories', {
         title: title.trim() || 'Untitled Memory',
         date,
         story,
@@ -36,7 +36,7 @@ export default function CreateMemoryForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

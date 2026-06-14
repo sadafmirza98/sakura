@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import type { ContentItem } from '@/store/useContentStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
+import { useUIStore } from '@/store/useUIStore'
+import { DeleteButton } from './shared'
 
 interface Props {
   item: ContentItem | null
@@ -9,9 +11,11 @@ interface Props {
 
 export default function PoemPanel({ item }: Readonly<Props>) {
   const clipRef = useRef<HTMLDivElement>(null)
+  const { delete: deleteItem } = useContentStore()
+  const { closeRightPanel } = useUIStore()
 
   const title  = (item?.title  as string) ?? 'Untitled Poem'
-  const text   = (item?.text   as string) ?? ''
+  const text   = (item?.poem   as string) ?? ''
   const author = (item?.author as string) ?? ''
   const date   = (item?.date   as string) ?? ''
 
@@ -104,6 +108,15 @@ export default function PoemPanel({ item }: Readonly<Props>) {
           </div>
         )}
       </motion.div>
+
+      {item && (
+        <div style={{ marginTop: 20 }}>
+          <DeleteButton
+            label="poem"
+            onDelete={() => { deleteItem('poems', item.id); closeRightPanel() }}
+          />
+        </div>
+      )}
     </div>
   )
 }

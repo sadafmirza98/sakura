@@ -1,6 +1,8 @@
 'use client'
 import { motion } from 'framer-motion'
-import type { ContentItem } from '@/store/useContentStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
+import { useUIStore } from '@/store/useUIStore'
+import { DeleteButton } from './shared'
 
 interface Props {
   readonly item: ContentItem | null
@@ -112,6 +114,9 @@ function VoiceNotePlayer() {
 /* ─── main component ──────────────────────────────────────────────────── */
 
 export default function MemoryPanel({ item }: Props) {
+  const { delete: deleteItem } = useContentStore()
+  const { closeRightPanel } = useUIStore()
+
   if (!item) return <EmptyState />
 
   const title    = (item.title    as string) ?? ''
@@ -311,6 +316,14 @@ export default function MemoryPanel({ item }: Props) {
           <span style={{ fontSize: 14 }}>✏️</span>
           Edit memory
         </motion.button>
+      </div>
+
+      {/* ── Delete button ──────────────────────────── */}
+      <div style={{ marginTop: 12 }}>
+        <DeleteButton
+          label="memory"
+          onDelete={() => { deleteItem('memories', item.id); closeRightPanel() }}
+        />
       </div>
     </motion.article>
   )

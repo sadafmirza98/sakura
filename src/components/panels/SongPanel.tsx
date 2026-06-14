@@ -1,6 +1,8 @@
 'use client'
 import { motion } from 'framer-motion'
-import type { ContentItem } from '@/store/useContentStore'
+import { useContentStore, type ContentItem } from '@/store/useContentStore'
+import { useUIStore } from '@/store/useUIStore'
+import { DeleteButton } from './shared'
 
 interface Props {
   item: ContentItem | null
@@ -16,10 +18,13 @@ const MOODS = [
 ]
 
 export default function SongPanel({ item }: Readonly<Props>) {
+  const { delete: deleteItem } = useContentStore()
+  const { closeRightPanel } = useUIStore()
+
   const title       = (item?.title   as string) ?? 'Song Title'
   const artist      = (item?.artist  as string) ?? 'Artist'
   const url         = (item?.url     as string) ?? ''
-  const whyItMatters = (item?.whyItMatters as string) ?? ''
+  const whyItMatters = (item?.why    as string) ?? ''
   const mood        = (item?.mood    as string) ?? ''
   const albumArt    = (item?.albumArt as string) ?? ''
 
@@ -137,6 +142,15 @@ export default function SongPanel({ item }: Readonly<Props>) {
           </div>
         ))}
       </div>
+
+      {item && (
+        <div style={{ marginTop: 20 }}>
+          <DeleteButton
+            label="song"
+            onDelete={() => { deleteItem('songs', item.id); closeRightPanel() }}
+          />
+        </div>
+      )}
     </div>
   )
 }

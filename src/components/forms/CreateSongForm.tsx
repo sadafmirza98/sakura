@@ -8,7 +8,7 @@ const ACCENT = '#ffb450'
 const BLOSSOMS = 1
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreateSongForm({ onSave }: Readonly<Props>) {
@@ -39,7 +39,7 @@ export default function CreateSongForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)

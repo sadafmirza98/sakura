@@ -12,7 +12,7 @@ const WISH_CATS = [
 ]
 
 interface Props {
-  onSave: () => void
+  onSave: (id: string) => void
 }
 
 export default function CreateWishForm({ onSave }: Readonly<Props>) {
@@ -28,7 +28,7 @@ export default function CreateWishForm({ onSave }: Readonly<Props>) {
     if (saving) return
     setSaving(true)
     try {
-      await add('wishes', {
+      const id = await add('wishes', {
         wish: wish.trim() || 'A shared wish',
         category,
         completed: false,
@@ -37,7 +37,7 @@ export default function CreateWishForm({ onSave }: Readonly<Props>) {
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false)
-        onSave()
+        onSave(id)
       }, 1600)
     } catch {
       setSaving(false)
