@@ -157,20 +157,6 @@ export function BoardAmbient() {
 
       {/* Chalk text — "Dreams we're building" when idle, "Our Story So Far" on hover */}
       <AnimatePresence>
-        {!boardHovered && !timelineOpen && (
-          <motion.span
-            key="chalk-a"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
-            style={chalkTextStyle}
-          >
-            Dreams we&apos;re building
-          </motion.span>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
         {boardHovered && !timelineOpen && (
           <motion.span
             key="chalk-b"
@@ -916,7 +902,7 @@ export default function FateThreadOverlay() {
                   transformStyle: 'preserve-3d',
                 }}
               >
-                {['Dreams we\'re building', 'Travel the world', 'Our little home', 'Watch the aurora', 'Grow old together'].map((line, i) => (
+                {['Travel the world', 'Our little home', 'Watch the aurora', 'Grow old together'].map((line, i) => (
                   <motion.p
                     key={line}
                     initial={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -1118,7 +1104,7 @@ export default function FateThreadOverlay() {
                     whileTap={{ scale: 0.96 }}
                     aria-label="Return to garden"
                   >
-                    return to garden
+                    Return to garden
                   </motion.button>
                 </motion.div>
               )}
