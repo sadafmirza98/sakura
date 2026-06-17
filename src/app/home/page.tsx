@@ -15,6 +15,9 @@ import MemoryRing, { BookAmbient, BookHitZone, BookJourney } from '@/components/
 // Timeline board system
 import FateThreadOverlay, { BoardAmbient, BoardHitZone } from '@/components/world/FateThread'
 
+// Discoverability pointers
+import { BookPointerHint, BoardPointerHint } from '@/components/world/PointerHint'
+
 // HUD
 import MoonCounter    from '@/components/world/MoonCounter'
 import HoverTooltip   from '@/components/world/HoverTooltip'
@@ -28,7 +31,10 @@ import ToastNotification from '@/components/ui/ToastNotification'
 
 export default function GardenPage() {
   const { initListeners } = useContentStore()
-  const { rightPanel, closeRightPanel, closeCreate } = useUIStore()
+  const {
+    rightPanel, closeRightPanel, closeCreate,
+    bloomOpen, toggleBloom, timelineOpen, openTimeline, closeTimeline,
+  } = useUIStore()
   const panelOpen = rightPanel !== null
 
   useEffect(() => { return initListeners() }, [initListeners])
@@ -51,6 +57,16 @@ export default function GardenPage() {
       <BoardAmbient />
       <BoardHitZone />
       <FateThreadOverlay />
+
+      {/* ── Discoverability pointers ── */}
+      <BookPointerHint
+        visible={!bloomOpen && !panelOpen}
+        onClick={() => { closeRightPanel(); closeCreate(); toggleBloom() }}
+      />
+      <BoardPointerHint
+        visible={!timelineOpen && !panelOpen}
+        onClick={() => timelineOpen ? closeTimeline() : openTimeline()}
+      />
 
       {/* ── HUD ── */}
       <MoonCounter />

@@ -1,7 +1,7 @@
 'use client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { collection, onSnapshot, addDoc, deleteDoc, doc, type Unsubscribe } from 'firebase/firestore'
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, type Unsubscribe } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 
 // Generic record shape — each collection item must have at least an id
@@ -36,6 +36,7 @@ interface ContentState {
   // Actions
   initListeners: () => () => void
   add: (type: CollectionName, data: Record<string, unknown>) => Promise<string>
+  update: (type: CollectionName, id: string, data: Record<string, unknown>) => Promise<void>
   delete: (type: CollectionName, id: string) => Promise<void>
   createTimelineEvent: (sourceType: string, sourceId: string, title: string, date?: string) => Promise<string>
 }
@@ -116,6 +117,30 @@ export const useContentStore = create<ContentState>()(
         } catch {
           console.warn(`[ContentStore] Firestore unavailable — ${type} item saved locally.`)
           return tempId
+        }
+      },
+
+      /**
+       * Applies a partial update to an existing item in local state immediately,
+       * then attempts to sync it to Firestore. Items with a local-only id
+       * (prefix "local_") skip the Firestore call since they were never written there.
+       */
+      update: async (type, id, data) => {
+        for (const key of Object.keys(data)) {
+          if (data[key] === undefined) delete data[key]
+        }
+        set((state) => ({
+          [type]: (state[type] as ContentItem[]).map(
+            (item) => item.id === id ? { ...item, ...data } : item
+          ),
+        } as unknown as Partial<ContentState>))
+
+        if (!id.startsWith('local_')) {
+          try {
+            await updateDoc(doc(db, type, id), data)
+          } catch {
+            console.warn(`[ContentStore] Firestore update failed for ${type}/${id} — change kept locally.`)
+          }
         }
       },
 

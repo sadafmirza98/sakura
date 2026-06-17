@@ -329,19 +329,19 @@ export function BookHitZone() {
             exit={{ opacity: 0, y: 7 }}
             transition={{ duration: 0.28, ease: 'easeOut' }}
             style={{
-              position: 'absolute', bottom: 'calc(100% + 12px)',
-              left: '30%', transform: 'translateX(-50%)',
+              position: 'absolute', bottom: 'calc(100% + 1px)',
+              left: '10%', transform: 'translateX(-50%)',
               pointerEvents: 'none', textAlign: 'center', whiteSpace: 'nowrap',
             }}
           >
             <span style={{
               fontFamily: '"Playfair Display", Georgia, serif',
-              fontStyle: 'italic', fontWeight: 400,
-              fontSize: 'clamp(13px, 1.2vw, 16px)', letterSpacing: '0.05em',
+              fontStyle: 'italic', fontWeight: 200,
+              fontSize: 'clamp(13px, 1.2vw, 13px)', letterSpacing: '0.05em',
               color: 'rgba(245,238,210,0.94)',
               textShadow: '0 0 30px rgba(232,201,122,0.85), 0 0 60px rgba(232,201,122,0.28), 0 2px 6px rgba(0,0,0,0.92)',
             }}>
-              Open Our Story
+              Add to our Story
             </span>
             <motion.div
               animate={{ scaleX: [0.35, 1, 0.35], opacity: [0.25, 0.65, 0.25] }}

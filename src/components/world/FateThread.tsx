@@ -37,7 +37,7 @@ const BOARD_H     = 340     // px
    Idle magical notes that briefly appear on the board
 ───────────────────────────────────────────────────────────────────── */
 
-const IDLE_NOTES = ['06 Dec 2020', 'First Conversation', 'Engagement']
+const IDLE_NOTES = ['06 Dec 2020', 'First Date', 'First Game Together']
 
 const chalkTextStyle: React.CSSProperties = {
   fontFamily: '"Playfair Display", Georgia, serif',
@@ -50,8 +50,8 @@ const chalkTextStyle: React.CSSProperties = {
   display: 'block',
   textAlign: 'center',
   position: 'absolute',
-  top: '18%',
-  left: '50%',
+  top: '15%',
+  left: '40%',
   transform: 'translateX(-50%)',
 }
 
@@ -111,7 +111,7 @@ export function BoardAmbient() {
         style={{
           position: 'absolute',
           left: -60,
-          top: -120,
+          top: 125,
           width: 80,
           height: 110,
           borderRadius: '50%',
@@ -130,8 +130,8 @@ export function BoardAmbient() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             style={{
               position: 'absolute',
-              top: '22%',
-              left: '50%',
+              top: '0%',
+              left: '40%',
               transform: 'translateX(-50%) rotate(-2deg)',
               background: 'rgba(255,248,230,0.12)',
               border: '1px solid rgba(232,201,122,0.3)',
@@ -166,7 +166,7 @@ export function BoardAmbient() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             style={{ ...chalkTextStyle, color: 'rgba(245,238,210,0.9)', textShadow: '0 0 20px rgba(232,201,122,0.8)' }}
           >
-            Our Story So Far
+            Chapters of Us
           </motion.span>
         )}
       </AnimatePresence>

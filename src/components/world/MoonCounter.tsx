@@ -41,7 +41,7 @@ export default function MoonCounter() {
         // Exact position per spec
         position: 'fixed',
         top: 40,
-        left: '45%',
+        left: '40%',
         transform: 'translateX(-50%)',
         zIndex: 20,
         pointerEvents: 'none',
