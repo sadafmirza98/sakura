@@ -19,9 +19,9 @@
  * Close: thread dissolves, particles return to board, fade out
  */
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUIStore } from '@/store/useUIStore'
+import { useUIStore, type RightPanelType } from '@/store/useUIStore'
 import { useContentStore, type ContentItem } from '@/store/useContentStore'
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -779,6 +779,182 @@ function BlankNoteEditor({ onSave, onCancel }: BlankNoteEditorProps) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+   STORY ITEMS LIST
+   Compact horizontal strip shown at the bottom of the thread overlay.
+   Lists every saved item (poems, letters, wishes, places, songs,
+   memories) sorted by creation date. Clicking an item closes the
+   timeline and opens the appropriate view panel.
+───────────────────────────────────────────────────────────────────── */
+
+interface StoryEntry {
+  id: string
+  panelType: string
+  title: string
+  accent: string
+  icon: string
+  label: string
+  createdAt: string
+}
+
+const STORY_CFG = {
+  poems:    { label: 'Poem',   icon: '/assets/ui/letter.png',   accent: '#c9bfe8', panelType: 'poem',   getTitle: (i: ContentItem) => (i.title   as string) || 'Poem'   },
+  letters:  { label: 'Letter', icon: '/assets/ui/letter.png',   accent: '#d4aaff', panelType: 'letter', getTitle: (i: ContentItem) => (i.openWhen as string) || 'Letter' },
+  wishes:   { label: 'Wish',   icon: '/assets/ui/lantern.png',  accent: '#a8d8a0', panelType: 'wish',   getTitle: (i: ContentItem) => (i.wish     as string) || 'Wish'   },
+  places:   { label: 'Place',  icon: '/assets/ui/map.png',      accent: '#ffe890', panelType: 'place',  getTitle: (i: ContentItem) => (i.place    as string) || 'Place'  },
+  songs:    { label: 'Song',   icon: '/assets/ui/petal.png',    accent: '#ffb450', panelType: 'song',   getTitle: (i: ContentItem) => (i.title    as string) || 'Song'   },
+  memories: { label: 'Memory', icon: '/assets/ui/memories.png', accent: '#f2a8b8', panelType: 'memory', getTitle: (i: ContentItem) => (i.title    as string) || 'Memory' },
+} as const
+
+type StoryKey = keyof typeof STORY_CFG
+
+function StoryItemsList() {
+  const { poems, letters, wishes, places, songs, memories } = useContentStore()
+  const { closeTimeline, openRightPanel } = useUIStore()
+
+  const allItems = useMemo((): StoryEntry[] => {
+    const pairs: [StoryKey, ContentItem[]][] = [
+      ['memories', memories], ['poems', poems], ['letters', letters],
+      ['wishes', wishes], ['places', places], ['songs', songs],
+    ]
+    return pairs
+      .flatMap(([key, items]) => {
+        const cfg = STORY_CFG[key]
+        return items.map((item): StoryEntry => ({
+          id: item.id,
+          panelType: cfg.panelType,
+          title: cfg.getTitle(item),
+          accent: cfg.accent,
+          icon: cfg.icon,
+          label: cfg.label,
+          createdAt: (item.createdAt as string) ?? '',
+        }))
+      })
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  }, [poems, letters, wishes, places, songs, memories])
+
+  if (allItems.length === 0) return null
+
+  const handleSelect = (panelType: string, id: string) => {
+    closeTimeline()
+    openRightPanel(panelType as RightPanelType, { id })
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 28 }}
+      transition={{ delay: 2.2, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 44,
+        background: 'linear-gradient(0deg, rgba(4,2,18,0.96) 0%, rgba(4,2,18,0.72) 65%, transparent 100%)',
+        padding: 'clamp(14px, 2vh, 22px) clamp(14px, 2.5vw, 28px) clamp(18px, 3vh, 28px)',
+        pointerEvents: 'auto',
+      }}
+    >
+      {/* Header */}
+      <p style={{
+        fontFamily: 'Inter, sans-serif',
+        fontSize: 9,
+        letterSpacing: '0.16em',
+        textTransform: 'uppercase',
+        color: 'rgba(201,191,232,0.35)',
+        marginBottom: 10,
+        paddingLeft: 2,
+      }}>
+        Our story · {allItems.length} {allItems.length === 1 ? 'moment' : 'moments'}
+      </p>
+
+      {/* Horizontal scroll strip */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        overflowX: 'auto',
+        paddingBottom: 2,
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
+        {allItems.map((entry) => (
+          <motion.button
+            key={`${entry.panelType}-${entry.id}`}
+            onClick={() => handleSelect(entry.panelType, entry.id)}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            style={{
+              flexShrink: 0,
+              width: 'clamp(108px, 16vw, 152px)',
+              padding: '9px 11px',
+              borderRadius: 11,
+              background: `${entry.accent}0c`,
+              border: `1px solid ${entry.accent}20`,
+              cursor: 'pointer',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 5,
+              outline: 'none',
+            }}
+          >
+            {/* Type chip */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={entry.icon}
+                alt=""
+                aria-hidden="true"
+                style={{ width: 13, height: 13, objectFit: 'contain', opacity: 0.7, filter: `drop-shadow(0 0 3px ${entry.accent}88)` }}
+              />
+              <span style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 8.5,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: entry.accent,
+                opacity: 0.6,
+              }}>
+                {entry.label}
+              </span>
+            </div>
+
+            {/* Title */}
+            <p style={{
+              fontFamily: '"Playfair Display", Georgia, serif',
+              fontStyle: 'italic',
+              fontSize: 11.5,
+              color: 'rgba(240,238,252,0.82)',
+              lineHeight: 1.3,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
+              margin: 0,
+            }}>
+              {entry.title}
+            </p>
+
+            {/* Date */}
+            {entry.createdAt && (
+              <span style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 8,
+                color: 'rgba(201,191,232,0.28)',
+                letterSpacing: '0.04em',
+              }}>
+                {new Date(entry.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </span>
+            )}
+          </motion.button>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────
    FATE THREAD OVERLAY — the full cinematic timeline
 ───────────────────────────────────────────────────────────────────── */
 
@@ -796,6 +972,7 @@ export default function FateThreadOverlay() {
   // Drive phase transitions
   useEffect(() => {
     if (timelineOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhase('darkening')
       const t1 = setTimeout(() => setPhase('zoom'),      300)
       const t2 = setTimeout(() => setPhase('particles'), 800)
@@ -1114,6 +1291,9 @@ export default function FateThreadOverlay() {
                   >
                     Return to garden
                   </motion.button>
+
+                  {/* All saved content — scrollable strip at the bottom */}
+                  <StoryItemsList />
                 </motion.div>
               )}
             </AnimatePresence>

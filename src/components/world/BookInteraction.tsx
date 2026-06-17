@@ -71,10 +71,19 @@ const ORGANIC: Array<[number, number]> = [
   [   75, 318 ],  // Letters   — lower-right
 ]
 
-function organicPos(i: number): Pos {
+// MAX_RADIUS is the largest radius in ORGANIC — used to derive the mobile scale factor
+const MAX_RADIUS = 365
+
+function organicPos(i: number, scale: number): Pos {
   const [deg, r] = ORGANIC[i] ?? [-90, 320]
   const rad = (deg * Math.PI) / 180
-  return { x: Math.cos(rad) * r, y: Math.sin(rad) * r * 0.8 }
+  return { x: Math.cos(rad) * r * scale, y: Math.sin(rad) * r * 0.8 * scale }
+}
+
+// Computes how much to shrink radii so nothing overflows a narrow viewport.
+// Returns 1.0 on anything ≥850 px wide (desktop/tablet), scales down below that.
+function computeRingScale(vw: number): number {
+  return Math.min(1, (vw * 0.43) / MAX_RADIUS)
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -586,11 +595,20 @@ function ThreadCanvas({ positions, bookX, bookY }: ThreadProps) {
 ───────────────────────────────────────────────────────────────────── */
 
 export default function MemoryRing() {
-  const { bloomOpen, closeBloom, openCreate, openRightPanel, createSelectorOpen, closeCreateSelector } = useUIStore()
+  const { bloomOpen, closeBloom, openCreate, createSelectorOpen, closeCreateSelector } = useUIStore()
   const content = useContentStore()
 
   const [objPositions, setObjPositions] = useState<Array<Pos | null>>(RING_ITEMS.map(() => null))
   const [bookScreenPos, setBookScreenPos] = useState<Pos>({ x: 0, y: 0 })
+  const [ringScale, setRingScale] = useState(1)
+
+  // Recompute scale on mount + every resize so ring always fits the viewport
+  useEffect(() => {
+    const update = () => setRingScale(computeRingScale(window.innerWidth))
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   const updatePos = useCallback((i: number, pos: Pos | null) => {
     setObjPositions((prev) => {
@@ -612,14 +630,10 @@ export default function MemoryRing() {
     return () => cancelAnimationFrame(id)
   }, [bloomOpen])
 
-  const handleItemClick = useCallback((item: RingItem, latest: ContentItem | undefined) => {
+  const handleItemClick = useCallback((item: RingItem) => {
     if (createSelectorOpen) { closeCreateSelector(); return }
-    if (latest) {
-      openRightPanel(item.type, { id: latest.id })
-      return
-    }
     openCreate(item.type as CreateType)
-  }, [createSelectorOpen, closeCreateSelector, openCreate, openRightPanel])
+  }, [createSelectorOpen, closeCreateSelector, openCreate])
 
   const handleBackdrop = useCallback(() => {
     if (createSelectorOpen) { closeCreateSelector(); return }
@@ -762,7 +776,8 @@ export default function MemoryRing() {
                   item={item}
                   index={i}
                   preview={preview}
-                  onOpen={() => handleItemClick(item, latest)}
+                  ringScale={ringScale}
+                  onOpen={() => handleItemClick(item)}
                   onPositionChange={(pos) => updatePos(i, pos)}
                 />
               )
@@ -783,14 +798,16 @@ interface BloomObjectProps {
   readonly item: RingItem
   readonly index: number
   readonly preview: string | null
+  readonly ringScale: number
   readonly onOpen: () => void
   readonly onPositionChange: (pos: Pos | null) => void
 }
 
-function BloomObject({ item, index, preview, onOpen, onPositionChange }: BloomObjectProps) {
+function BloomObject({ item, index, preview, ringScale, onOpen, onPositionChange }: BloomObjectProps) {
   const [hovering, setHovering] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const pos = organicPos(index)
+  const pos = organicPos(index, ringScale)
+  const iconPx = Math.max(48, Math.round(72 * ringScale))
   const entryDelay = 0.72 + index * 0.09
 
   // Report screen position for thread canvas
@@ -872,9 +889,9 @@ function BloomObject({ item, index, preview, onOpen, onPositionChange }: BloomOb
               src={item.asset}
               alt=""
               aria-hidden="true"
-              width={72}
-              height={72}
-              style={{ width: 72, height: 72, objectFit: 'contain', display: 'block' }}
+              width={iconPx}
+              height={iconPx}
+              style={{ width: iconPx, height: iconPx, objectFit: 'contain', display: 'block' }}
             />
           </motion.div>
 

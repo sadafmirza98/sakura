@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useUIStore, type CreateType, type RightPanelType } from '@/store/useUIStore'
@@ -26,6 +26,7 @@ import CreateWishForm      from '@/components/forms/CreateWishForm'
 import CreatePlaceForm     from '@/components/forms/CreatePlaceForm'
 import CreateLetterForm    from '@/components/forms/CreateLetterForm'
 import CreateMilestoneForm from '@/components/forms/CreateMilestoneForm'
+import SavedAccordion from '@/components/panels/SavedAccordion'
 
 /* ─── Panel header config per type ──────────────────────────────────────── */
 interface PanelConfig {
@@ -229,6 +230,7 @@ export default function RightPanel() {
             style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}
           >
             <PanelContent
+              key={`${rightPanel ?? ''}-${createType ?? ''}`}
               type={rightPanel}
               createType={createType}
               item={item}
@@ -250,29 +252,34 @@ function PanelContent({
   createType: CreateType | null
   item: ReturnType<typeof useContentStore.getState>['memories'][number] | null
 }>) {
-  const { closeCreate, openRightPanel, enterScene } = useUIStore()
+  const [highlightedId, setHighlightedId] = useState<string | null>(null)
+  const [formKey, setFormKey] = useState(0)
+
   const onSave = (id: string) => {
-    const viewType: RightPanelType = createType === 'milestone' ? 'memory' : createType
-    if (viewType) {
-      enterScene('garden')
-      openRightPanel(viewType, { id })
-    } else {
-      closeCreate()
-    }
+    setHighlightedId(id)
+    setFormKey(k => k + 1)
   }
 
   if (type === 'create') {
-    if (createType === 'memory')    return <CreateMemoryForm    onSave={onSave} />
-    if (createType === 'song')      return <CreateSongForm      onSave={onSave} />
-    if (createType === 'poem')      return <CreatePoemForm      onSave={onSave} />
-    if (createType === 'whisper')   return <CreateWhisperForm   onSave={onSave} />
-    if (createType === 'wish')      return <CreateWishForm      onSave={onSave} />
-    if (createType === 'place')     return <CreatePlaceForm     onSave={onSave} />
-    if (createType === 'letter')    return <CreateLetterForm    onSave={onSave} />
-    if (createType === 'milestone') return <CreateMilestoneForm onSave={onSave} />
-    // Fallback — render memory form if createType is unrecognised
-    return <CreateMemoryForm onSave={onSave} />
+    const form = (() => {
+      if (createType === 'memory')    return <CreateMemoryForm    onSave={onSave} />
+      if (createType === 'song')      return <CreateSongForm      onSave={onSave} />
+      if (createType === 'poem')      return <CreatePoemForm      onSave={onSave} />
+      if (createType === 'whisper')   return <CreateWhisperForm   onSave={onSave} />
+      if (createType === 'wish')      return <CreateWishForm      onSave={onSave} />
+      if (createType === 'place')     return <CreatePlaceForm     onSave={onSave} />
+      if (createType === 'letter')    return <CreateLetterForm    onSave={onSave} />
+      if (createType === 'milestone') return <CreateMilestoneForm onSave={onSave} />
+      return <CreateMemoryForm onSave={onSave} />
+    })()
+    return (
+      <>
+        <div key={formKey}>{form}</div>
+        <SavedAccordion createType={createType} highlightedId={highlightedId} />
+      </>
+    )
   }
+
   if (type === 'memory')  return <MemoryPanel  item={item} />
   if (type === 'song')    return <SongPanel    item={item} />
   if (type === 'poem')    return <PoemPanel    item={item} />
