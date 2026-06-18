@@ -1,5 +1,6 @@
 'use client'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useContentStore, type ContentItem } from '@/store/useContentStore'
 import { useUIStore } from '@/store/useUIStore'
 import { DeleteButton } from './shared'
@@ -18,8 +19,9 @@ const MOODS = [
 ]
 
 export default function SongPanel({ item }: Readonly<Props>) {
-  const { delete: deleteItem } = useContentStore()
-  const { closeRightPanel } = useUIStore()
+  const { delete: deleteItem, update, memories } = useContentStore()
+  const { closeRightPanel, openRightPanel } = useUIStore()
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const title       = (item?.title   as string) ?? 'Song Title'
   const artist      = (item?.artist  as string) ?? 'Artist'
@@ -32,6 +34,21 @@ export default function SongPanel({ item }: Readonly<Props>) {
 
   const handlePlay = () => {
     if (url) window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  const linkedIds = (item?.linkedMemories as string[]) ?? []
+  const linkedMemories = memories.filter((m) => linkedIds.includes(m.id))
+  const availableMemories = memories.filter((m) => !linkedIds.includes(m.id))
+
+  const handleAddMemory = async (memId: string) => {
+    if (!item) return
+    await update('songs', item.id, { linkedMemories: [...linkedIds, memId] })
+    setPickerOpen(false)
+  }
+
+  const handleRemoveMemory = async (memId: string) => {
+    if (!item) return
+    await update('songs', item.id, { linkedMemories: linkedIds.filter((id) => id !== memId) })
   }
 
   return (
@@ -121,27 +138,105 @@ export default function SongPanel({ item }: Readonly<Props>) {
         Linked memories
       </p>
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 12,
-              flexShrink: 0,
-              background: 'rgba(242,168,184,0.08)',
-              border: '1px solid rgba(242,168,184,0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/ui/petal.png" alt="" aria-hidden="true" style={{ width: 16, height: 16, objectFit: 'contain', opacity: 0.3 }} />
-          </div>
-        ))}
+        {linkedMemories.map((mem) => {
+          const memTitle = (mem.title as string) ?? 'Memory'
+          const photoUrl = (mem.photoUrl as string) ?? ''
+          return (
+            <div key={mem.id} style={{ position: 'relative', flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => openRightPanel('memory', { id: mem.id })}
+                title={memTitle}
+                style={{
+                  width: 52, height: 52, borderRadius: 12, padding: 0,
+                  background: photoUrl ? 'transparent' : 'rgba(242,168,184,0.08)',
+                  border: '1px solid rgba(242,168,184,0.15)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', overflow: 'hidden',
+                }}
+              >
+                {photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src="/assets/ui/memories.png" alt="" aria-hidden="true" style={{ width: 18, height: 18, objectFit: 'contain', opacity: 0.55 }} />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleRemoveMemory(mem.id) }}
+                aria-label={`Unlink ${memTitle}`}
+                style={{
+                  position: 'absolute', top: -5, right: -5, width: 16, height: 16, borderRadius: '50%',
+                  background: 'rgba(20,10,30,0.92)', border: '1px solid rgba(255,255,255,0.18)',
+                  color: 'rgba(255,255,255,0.65)', fontSize: 9, lineHeight: 1, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )
+        })}
+
+        {/* Add button */}
+        <button
+          type="button"
+          onClick={() => setPickerOpen((o) => !o)}
+          aria-label="Link a memory"
+          style={{
+            width: 52, height: 52, borderRadius: 12, flexShrink: 0,
+            background: pickerOpen ? `${accent}1e` : 'rgba(255,255,255,0.04)',
+            border: pickerOpen ? `1px solid ${accent}55` : '1px dashed rgba(255,255,255,0.2)',
+            color: pickerOpen ? accent : 'rgba(240,238,252,0.5)',
+            fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          +
+        </button>
       </div>
+
+      {/* Memory picker dropdown */}
+      <AnimatePresence>
+        {pickerOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              marginTop: 8, maxHeight: 180, overflowY: 'auto', borderRadius: 12,
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', padding: 6,
+            }}>
+              {availableMemories.length === 0 ? (
+                <p className="font-sans" style={{ fontSize: 11, color: 'rgba(201,191,232,0.4)', padding: 10, textAlign: 'center' }}>
+                  No more memories to link
+                </p>
+              ) : (
+                availableMemories.map((mem) => (
+                  <button
+                    key={mem.id}
+                    type="button"
+                    onClick={() => handleAddMemory(mem.id)}
+                    style={{
+                      display: 'flex', width: '100%', alignItems: 'center', gap: 8,
+                      padding: '8px 10px', borderRadius: 8, background: 'transparent', border: 'none',
+                      cursor: 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    <span className="font-serif" style={{ fontStyle: 'italic', fontSize: 12.5, color: 'rgba(240,238,252,0.82)' }}>
+                      {(mem.title as string) || 'Untitled Memory'}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {item && (
         <div style={{ marginTop: 20 }}>

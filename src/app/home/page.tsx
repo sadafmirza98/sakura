@@ -18,6 +18,9 @@ import FateThreadOverlay, { BoardAmbient, BoardHitZone } from '@/components/worl
 // Discoverability pointers
 import { BookPointerHint, BoardPointerHint } from '@/components/world/PointerHint'
 
+// Cursor effects
+import CursorSparkles from '@/components/world/CursorSparkles'
+
 // HUD
 import MoonCounter    from '@/components/world/MoonCounter'
 import HoverTooltip   from '@/components/world/HoverTooltip'
@@ -93,6 +96,7 @@ export default function GardenPage() {
 
       <RightPanel />
       <ToastNotification />
+      <CursorSparkles />
     </div>
   )
 }

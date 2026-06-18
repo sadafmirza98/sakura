@@ -3,8 +3,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useContentStore, type ContentItem } from '@/store/useContentStore'
 import { useUIStore } from '@/store/useUIStore'
-import { DeleteButton } from './shared'
-import { Field, SakuraInput, SakuraTextarea, SakuraDatePicker, SaveButton } from '@/components/forms/shared'
+import { DeleteButton, EditMemoryForm } from './shared'
 
 interface Props {
   readonly item: ContentItem | null
@@ -343,77 +342,6 @@ export default function MemoryPanel({ item }: Props) {
         />
       </div>
     </motion.article>
-  )
-}
-
-/* ─── Edit form ────────────────────────────────────────────────────────── */
-
-interface EditMemoryFormProps {
-  readonly item: ContentItem
-  readonly onCancel: () => void
-  readonly onSave: (data: Record<string, unknown>) => Promise<void>
-}
-
-function EditMemoryForm({ item, onCancel, onSave }: EditMemoryFormProps) {
-  const [title, setTitle] = useState((item.title as string) ?? '')
-  const [date, setDate]   = useState((item.date as string) ?? '')
-  const [story, setStory] = useState((item.story as string) ?? '')
-  const [tags, setTags]   = useState(((item.tags as string[]) ?? []).join(', '))
-  const [saving, setSaving] = useState(false)
-
-  const handleSave = async () => {
-    if (saving) return
-    setSaving(true)
-    await onSave({
-      title: title.trim() || 'Untitled Memory',
-      date,
-      story,
-      tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
-    })
-  }
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <p className="font-serif" style={{ fontSize: 16, color: '#f0eefc', fontWeight: 300, marginBottom: 18 }}>
-        Edit memory
-      </p>
-
-      <Field label="Title">
-        <SakuraInput type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-      </Field>
-      <Field label="Date">
-        <SakuraDatePicker value={date} onChange={setDate} placeholder="When did this happen?" />
-      </Field>
-      <Field label="Your story">
-        <SakuraTextarea rows={4} value={story} onChange={(e) => setStory(e.target.value)} />
-      </Field>
-      <Field label="Tags">
-        <SakuraInput type="text" value={tags} onChange={(e) => setTags(e.target.value)} />
-      </Field>
-
-      <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-        <div style={{ flex: 1 }}>
-          <SaveButton accent={ACCENT} icon="/assets/ui/memories.png" label="Save changes" onClick={handleSave} disabled={saving} />
-        </div>
-        <motion.button
-          onClick={onCancel}
-          whileHover={{ background: 'rgba(255,255,255,0.06)' }}
-          whileTap={{ scale: 0.97 }}
-          style={{
-            padding: '13px 18px',
-            borderRadius: 14,
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(255,255,255,0.03)',
-            color: 'rgba(240,238,252,0.55)',
-            fontSize: 14,
-            fontFamily: 'Inter, sans-serif',
-            cursor: 'pointer',
-          }}
-        >
-          Cancel
-        </motion.button>
-      </div>
-    </motion.div>
   )
 }
 

@@ -900,7 +900,7 @@ function BloomObject({ item, index, preview, ringScale, onOpen, onPositionChange
             animate={{
               opacity: hovering ? 1 : 0.4,
               y: hovering ? 0 : 7,
-              color: hovering ? item.accent : 'rgba(240,238,252,0.5)',
+              color: hovering ? item.accent : '#ffffff',
             }}
             transition={{ duration: 0.2 }}
             style={{
